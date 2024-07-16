@@ -3,6 +3,7 @@
 #include <GL/glext.h>
 #include <GLFW/glfw3.h>
 #include "libs/stb_image.h"
+#include <cwchar>
 #include <glm/detail/qualifier.hpp>
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/ext/matrix_float4x4.hpp>
@@ -27,8 +28,8 @@ GLFWwindow* init_glfw();
 unsigned int set_texture(const char * path, float rgba);
 
 
-const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 600;
+const unsigned int SCR_WIDTH = 1500;
+const unsigned int SCR_HEIGHT = 900;
 
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
@@ -43,6 +44,7 @@ bool firstMouse = true;
 int main(){
 
     auto window = init_glfw();
+
 
     float vertices[] = {
         -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
@@ -90,16 +92,19 @@ int main(){
 
     glm::vec3 cubePositions[] = {
         glm::vec3( 0.0f, 0.0f, 0.0f),
-        glm::vec3( 2.0f, 5.0f, -15.0f),
-        glm::vec3(-1.5f, -2.2f, -2.5f),
-        glm::vec3(-3.8f, -2.0f, -12.3f),
-        glm::vec3( 2.4f, -0.4f, -3.5f),
-        glm::vec3(-1.7f, 3.0f, -7.5f),
-        glm::vec3( 1.3f, -2.0f, -2.5f),
-        glm::vec3( 1.5f, 2.0f, -2.5f),
-        glm::vec3( 1.5f, 0.2f, -1.5f),
-        glm::vec3(-1.3f, 1.0f, -1.5f)
+        glm::vec3(0.0f,0.0f,1.0f)
+    //    glm::vec3( 2.0f, 5.0f, -15.0f),
+    //    glm::vec3(-1.5f, -2.2f, -2.5f),
+    //    glm::vec3(-3.8f, -2.0f, -12.3f),
+    //    glm::vec3( 2.4f, -0.4f, -3.5f),
+    //    glm::vec3(-1.7f, 3.0f, -7.5f),
+    //    glm::vec3( 1.3f, -2.0f, -2.5f),
+    //    glm::vec3( 1.5f, 2.0f, -2.5f),
+    //    glm::vec3( 1.5f, 0.2f, -1.5f),
+    //    glm::vec3(-1.3f, 1.0f, -1.5f)
     };
+
+
 
     //    unsigned int indices[] = { 0,1,3,
     //                            1,2,3};
@@ -155,8 +160,7 @@ int main(){
 
        glm::mat4 projection = glm::mat4(1.0f);
        projection = glm::perspective(glm::radians(45.0f),(float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-       unsigned int projcetion =  glGetUniformLocation(shader_program.ID, "projection");
-
+       unsigned int projcetion = glGetUniformLocation(shader_program.ID, "projection");
        //        glm::mat4 model  = glm::mat4(1.0f);
        glm::mat4 view = camera.GetViewMatrix();
        view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
@@ -165,22 +169,24 @@ int main(){
 
        glUniformMatrix4fv(view_loc, 1, GL_FALSE, &view[0][0]);
        glUniformMatrix4fv(projcetion, 1, GL_FALSE, &projection[0][0]);
-
        glBindVertexArray(vertex_array_object);
 
 
-       for (unsigned int i = 0; i < 10; i++) {
+       for(float x = 0; x<1; x++){
+           for(float z = 0; z<1; z++){
+               for(int y = 0; y<1; y++){
+                   glm::vec3 cube_position = glm::vec3(x,y,z);
+                   glm::mat4 model = glm::mat4(1.0f);
+                   model = glm::translate(model, cube_position);
+                   //float angle = glfwGetTime() * 25.0f;
+                   //model = glm::rotate(model, glm::radians(angle), glm::vec3(0.0f, 1.0f, 0.0f));
+                   unsigned int model_loc = glGetUniformLocation(shader_program.ID, "model");
+                   glUniformMatrix4fv(model_loc, 1, GL_FALSE, glm::value_ptr(model));
+                   glDrawArrays(GL_TRIANGLES, 0, 36);
+               }
+           }
 
-            glm::mat4 model = glm::mat4(1.0f);
-            model = glm::translate(model, cubePositions[i]);
-            float angle = 20.0f * i;
-            angle = glfwGetTime() * 25.0f * i/2;
-            model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-            unsigned int model_loc = glGetUniformLocation(shader_program.ID, "model");
-            glUniformMatrix4fv(model_loc, 1, GL_FALSE, glm::value_ptr(model));
-
-            glDrawArrays(GL_TRIANGLES, 0, 36);
-        }
+       }
         //shader_program.setMat4("projection", projection);
         //color changing shit ____________________________________________________
        //double time_val = glfwGetTime();
