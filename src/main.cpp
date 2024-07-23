@@ -1,4 +1,5 @@
 #include "libs/glad/include/glad/glad.h"
+#include "libs/Terrain.hpp"
 #include <GL/gl.h>
 #include <GL/glext.h>
 #include <GLFW/glfw3.h>
@@ -16,83 +17,7 @@
 #include "libs/camera.h"
 #include "libs/shader.hpp"
 #include <glm/trigonometric.hpp>
-#include "libs/Chunk.hpp"
 #include <iostream>
-
-
-
-
-//class Chunk{
-//    private:
-//
-//    unsigned int vao, vbo, ebo, instance_vbo;
-//    float vertices[40] = {
-//        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,//0
-//        0.5f, -0.5f, -0.5f,  1.0f, 0.0f,//1
-//        0.5f,  0.5f, -0.5f,  1.0f, 1.0f,//2
-//        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,//3
-//        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,//4
-//        0.5f, -0.5f,  0.5f,  1.0f, 0.0f,//5
-//        0.5f,  0.5f,  0.5f,  1.0f, 1.0f,//6
-//        -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,//7
-//    };
-//    int indices[36] = {
-//       0,1,2,2,3,0,
-//       4,5,6,6,7,4,
-//       0,1,5,5,4,0,
-//       2,3,7,7,6,2,
-//       0,3,7,7,4,0,
-//       1,2,6,6,5,1
-//    };
-//    std::vector<glm::vec3> positions;
-//    void gen_chunk_data(){
-//        for (int x = 0; x < 16; ++x) {
-//            for (int y = 0; y < 256; ++y) {
-//                for (int z = 0; z < 16; ++z) {
-//                    positions.emplace_back(x, y, z);
-//                }
-//            }
-//        }
-//    }
-//
-//    public:
-//    Chunk(){
-//        gen_chunk_data();
-//        glGenBuffers(1,&vbo);
-//        glBindBuffer(GL_ARRAY_BUFFER,vbo);
-//        glBufferData(GL_ARRAY_BUFFER,sizeof(float) * 40, vertices, GL_STATIC_DRAW);
-//
-//
-//        glGenVertexArrays(1,&vao);
-//        glBindVertexArray(vao);
-//        glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE, sizeof(float)* (3 + 2), (void*)0);
-//        glVertexAttribPointer(1,2,GL_FLOAT,GL_FALSE, sizeof(float) * 5,(void *) (3 * sizeof(float)));
-//        glEnableVertexAttribArray(0);
-//        glEnableVertexAttribArray(1);
-//        glBindBuffer(GL_ARRAY_BUFFER,0);
-//
-//        glGenBuffers(1,&ebo);
-//        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,ebo);
-//        glBufferData(GL_ELEMENT_ARRAY_BUFFER,sizeof(indices), indices, GL_STATIC_DRAW);
-//
-//
-//        glGenBuffers(1,&instance_vbo);
-//        glBindBuffer(GL_ARRAY_BUFFER,instance_vbo);
-//        glBufferData(GL_ARRAY_BUFFER, positions.size() * sizeof(glm::vec3), &positions[0], GL_STATIC_DRAW);
-//
-//
-//        glVertexAttribPointer(2,3,GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void *) 0);
-//        glEnableVertexAttribArray(2);
-//        glVertexAttribDivisor(2, 1);
-//
-//        glBindVertexArray(0);
-//    }
-//    void draw(){
-//        glBindVertexArray(this->vao);
-//        glDrawElementsInstanced(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0, positions.size());
-//    }
-//
-//};
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void process_input(GLFWwindow* window, float input_debug);
@@ -111,7 +36,7 @@ float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
 //camera
-Camera camera(glm::vec3(0.0f, 256.0f, 3.0f));
+Camera camera(glm::vec3(80.0f, 80.0f, 80.0f), glm::vec3(0.0f,1.0f,0.0f), -90.0f, 10.0f);
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT/ 2.0f;
 bool firstMouse = true;
@@ -120,19 +45,6 @@ bool firstMouse = true;
 int main(){
 
     auto window = init_glfw();
-
-    //    unsigned int element_buffer_obj, vertex_array_object, vertex_buffer_object;
-    //    glGenVertexArrays(1,&vertex_array_object);
-    //    glGenBuffers(1,&vertex_buffer_object);
-    //    glBindVertexArray(vertex_array_object);
-    //    glBindBuffer(GL_ARRAY_BUFFER,vertex_buffer_object);
-    //    glBufferData(GL_ARRAY_BUFFER,sizeof(vertices),vertices,GL_STATIC_DRAW);
-    //    glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,sizeof(float) * 5, (void *)0);
-    //    glEnableVertexAttribArray(0);
-    //    glVertexAttribPointer(1,2,GL_FLOAT,GL_FALSE,sizeof(float) * 5, (void *)(3*sizeof(float)));
-    //    glEnableVertexAttribArray(1);
-    //    glBindBuffer(GL_ARRAY_BUFFER,0);
-
 
     Shader shader_program("../src/libs/vs.txt","../src/libs/fs.txt");
     const char*  texture_path1 = "../src/res/container.jpg";
@@ -145,8 +57,11 @@ int main(){
     shader_program.set_int("texture1", 0);
     shader_program.set_int("texture2", 1);
 
+    Terrain t(16,10);
+    t.gen_terrain(1.0f,2.0f,4.0f,  1.0f,0.5f,0.25f);
+    t.init_world_chunks();
 
-    Chunk chunk;
+
 
     while(!glfwWindowShouldClose(window)){
         //event/input handeling
@@ -158,7 +73,7 @@ int main(){
 
         //rendering__________________________________
 
-        glClearColor(0.135f,0.206f,0.235f,0.1f);
+        glClearColor(0.678f,0.847f,0.902f,0.4f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glActiveTexture(GL_TEXTURE0);
@@ -184,19 +99,8 @@ int main(){
         unsigned int view_loc = glGetUniformLocation(shader_program.ID, "view");
         glUniformMatrix4fv(view_loc, 1, GL_FALSE, &view[0][0]);
 
+        t.draw_terrain();
 
-        chunk.draw();
-
-
-        //shader_program.setMat4("projection", projection);
-        //color changing shit ____________________________________________________
-       //double time_val = glfwGetTime();
-       //float green_val = (sin(time_val)/2.0f + 0.5f);
-       //int vertex_color_location = glGetUniformLocation(shader_program,"our_color");
-       //glUniform4f(vertex_color_location,0.0f,green_val, 0.0f, 1.0f);
-
-       //glDrawArrays(GL_TRIANGLES,0,3);//This uses the currently bound vao and uses its data
-       //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
        // swaps the buffer swaps the colour buffer(a buffer which contais the
        // colour val of each rendering pixel) and show it to the screen
        glfwSwapBuffers(window);
@@ -299,6 +203,9 @@ GLFWwindow* init_glfw(){
         return 0;
     }
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    //glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
     return window;
 }
 unsigned int set_texture(const char * path, float rgba){

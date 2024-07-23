@@ -11,10 +11,11 @@ private:
     int indices[36];
     std::vector<glm::vec3> positions;
 
-    void gen_chunk_data();
+
 
 public:
     Chunk();
+    void gen_chunk_data(std::vector<glm::vec3> data);
     void draw();
 };
 
