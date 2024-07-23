@@ -1,16 +1,18 @@
 #include "Chunk.hpp"
 #include "glad/include/glad/glad.h"
+#include <glm/ext/vector_float3.hpp>
+#include <vector>
 
 Chunk::Chunk() {
-    gen_chunk_data();
-
     // Initialize vertices and indices
+
     float vertices[40] = {
         // positions         // texture coords
-        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f, // 0
-         0.5f, -0.5f, -0.5f,  1.0f, 0.0f, // 1
-         0.5f,  0.5f, -0.5f,  1.0f, 1.0f, // 2
-        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f, // 3
+        -0.5f, -0.5f, -0.5f,  1.0f, 0.0f, // 0
+         0.5f, -0.5f, -0.5f,  0.0f, 0.0f, // 1
+         0.5f,  0.5f, -0.5f,  0.0f, 1.0f, // 2
+        -0.5f,  0.5f, -0.5f,  1.0f, 1.0f, // 3
+
         -0.5f, -0.5f,  0.5f,  0.0f, 0.0f, // 4
          0.5f, -0.5f,  0.5f,  1.0f, 0.0f, // 5
          0.5f,  0.5f,  0.5f,  1.0f, 1.0f, // 6
@@ -18,11 +20,11 @@ Chunk::Chunk() {
     };
 
     int indices[36] = {
-       0,1,2,2,3,0,
+       1,0,3,3,2,1,
        4,5,6,6,7,4,
        0,1,5,5,4,0,
        2,3,7,7,6,2,
-       0,3,7,7,4,0,
+       0,4,7,7,3,0,
        1,2,6,6,5,1
     };
 
@@ -53,18 +55,17 @@ Chunk::Chunk() {
     glBindVertexArray(0);
 }
 
+
+
+void Chunk::gen_chunk_data(std::vector<glm::vec3> data) {
+    positions = data;
+    glBindBuffer(GL_ARRAY_BUFFER, instance_vbo);
+    glBufferData(GL_ARRAY_BUFFER, positions.size() * sizeof(glm::vec3), &positions[0], GL_STATIC_DRAW);
+    // Ensure positions vector is empty before generating new data
+}
+
+
 void Chunk::draw() {
     glBindVertexArray(this->vao);
     glDrawElementsInstanced(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0, positions.size());
-}
-void Chunk::gen_chunk_data() {
-    positions.clear();  // Ensure positions vector is empty before generating new data
-
-    for (int x = 0; x < 16; ++x) {
-        for (int y = 0; y < 256; ++y) {
-            for (int z = 0; z < 16; ++z) {
-                positions.emplace_back(x, y, z);
-            }
-        }
-    }
 }
