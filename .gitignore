@@ -1,0 +1,5 @@
+build/*
+!build/voxel_lab
+!build/build_win/voxel_lab.exe
+
+src/CMakeLists.txt

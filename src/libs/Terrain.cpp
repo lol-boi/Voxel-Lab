@@ -40,8 +40,8 @@ void Terrain::init_world_chunks(){
             for(int x = 0; x<chunk_size; ++x){
                 for(int z = 0; z<chunk_size; ++z){
                     int height = generation[(cx*chunk_size)+x][(cy*chunk_size)+z];
-                    glm::vec3 pos((cx*chunk_size)+x,height,(cy*chunk_size)+z);
                     for(int y = 0; y<=height; y++){
+                        glm::vec3 pos((cx*chunk_size)+x,y,(cy*chunk_size)+z);
                         chunk_positions.push_back(pos);
                     }
                 }
