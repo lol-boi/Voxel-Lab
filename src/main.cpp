@@ -57,7 +57,7 @@ int main(){
     shader_program.set_int("texture1", 0);
     shader_program.set_int("texture2", 1);
 
-    Terrain t(8,8);
+    Terrain t(16,8);
     t.gen_terrain(1.0f,2.0f,4.0f,  1.0f,0.5f,0.25f);
     t.init_world_chunks();
 
