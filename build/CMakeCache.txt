@@ -254,6 +254,9 @@ CMAKE_TOOLCHAIN_FILE:UNINITIALIZED=/usr/share/mingw/toolchain-x86_64-w64-mingw32
 // Studio IDE projects all commands are done without /nologo.
 CMAKE_VERBOSE_MAKEFILE:BOOL=FALSE
 
+//Path to a library.
+GLFW_LIB:FILEPATH=/usr/x86_64-w64-mingw32/lib/libglfw3.a
+
 //Path to a file.
 OPENGL_EGL_INCLUDE_DIR:PATH=/usr/include
 
@@ -271,6 +274,9 @@ OPENGL_GLX_INCLUDE_DIR:PATH=/usr/include
 
 //Path to a file.
 OPENGL_INCLUDE_DIR:PATH=/usr/include
+
+//Path to a library.
+OPENGL_LIB:FILEPATH=/usr/lib/libGL.so
 
 //Path to a library.
 OPENGL_egl_LIBRARY:FILEPATH=/usr/lib/libEGL.so
