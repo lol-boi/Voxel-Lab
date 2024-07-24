@@ -1,0 +1,1 @@
+/usr/bin/c++ -fPIC -shared -Wl,-soname,libshader.so -o libshader.so CMakeFiles/shader.dir/libs/shader.cpp.o  -Wl,-rpath,/home/silva/projects/voxel_lab/build libglad.so
