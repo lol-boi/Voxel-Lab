@@ -1,0 +1,1 @@
+ libterrain.dll.a libchunk.dll.a libshader.dll.a libimage.dll.a libglad.dll.a -lopengl32 "/usr/x86_64-w64-mingw32/lib/libglfw3.a" -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32 

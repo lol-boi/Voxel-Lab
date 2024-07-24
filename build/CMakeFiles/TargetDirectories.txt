@@ -1,0 +1,9 @@
+/home/silva/projects/voxel_lab/build/CMakeFiles/glad.dir
+/home/silva/projects/voxel_lab/build/CMakeFiles/image.dir
+/home/silva/projects/voxel_lab/build/CMakeFiles/shader.dir
+/home/silva/projects/voxel_lab/build/CMakeFiles/chunk.dir
+/home/silva/projects/voxel_lab/build/CMakeFiles/terrain.dir
+/home/silva/projects/voxel_lab/build/CMakeFiles/glm.dir
+/home/silva/projects/voxel_lab/build/CMakeFiles/voxel_lab.dir
+/home/silva/projects/voxel_lab/build/CMakeFiles/edit_cache.dir
+/home/silva/projects/voxel_lab/build/CMakeFiles/rebuild_cache.dir

@@ -1,0 +1,3 @@
+/usr/bin/cmake -E rm -f CMakeFiles/voxel_lab.dir/objects.a
+/usr/bin/x86_64-w64-mingw32-ar qc CMakeFiles/voxel_lab.dir/objects.a @CMakeFiles/voxel_lab.dir/objects1.rsp
+/usr/bin/x86_64-w64-mingw32-g++ -D_FORTIFY_SOURCE=3 -D_GLIBCXX_ASSERTIONS -O2 -pipe -fno-plt -fexceptions --param=ssp-buffer-size=4 -Wformat -Werror=format-security -fcf-protection -Wl,-O1,--sort-common,--as-needed -fstack-protector -Wl,--whole-archive CMakeFiles/voxel_lab.dir/objects.a -Wl,--no-whole-archive -o voxel_lab.exe -Wl,--out-implib,libvoxel_lab.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles/voxel_lab.dir/linkLibs.rsp
