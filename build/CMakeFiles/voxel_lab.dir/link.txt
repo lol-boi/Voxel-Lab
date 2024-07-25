@@ -1,1 +1,0 @@
-/usr/bin/c++ CMakeFiles/voxel_lab.dir/main.cpp.o -o voxel_lab  -Wl,-rpath,/home/silva/projects/voxel_lab/build libterrain.so libchunk.so libshader.so libimage.so libglad.so /usr/lib/libglfw.so.3.4 /usr/lib/libGLX.so /usr/lib/libOpenGL.so
