@@ -1,1 +1,0 @@
-/usr/bin/cc -fPIC -shared -Wl,-soname,libimage.so -o libimage.so CMakeFiles/image.dir/libs/stb_image.c.o
