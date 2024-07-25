@@ -46,9 +46,9 @@ int main(){
 
     auto window = init_glfw();
 
-    Shader shader_program("../src/libs/vs.txt","../src/libs/fs.txt");
-    const char*  texture_path1 = "../src/res/container.jpg";
-    const char* texture_path2 = "../src/res/awesomeface.png";
+    Shader shader_program("../../src/libs/vs.txt","../../src/libs/fs.txt");
+    const char*  texture_path1 = "../../src/res/container.jpg";
+    const char* texture_path2 = "../../src/res/awesomeface.png";
     unsigned int texture1, texture2;
     texture1 = set_texture(texture_path1,false);
     texture2 = set_texture(texture_path2,true);

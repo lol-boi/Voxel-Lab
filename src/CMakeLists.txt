@@ -2,11 +2,10 @@
 cmake_minimum_required(VERSION 3.29)
 project(voxel_lab)
 
-# Set the module path to include custom find modules
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake/modules)
 
 # Add GLFW3
-find_package(glfw3 3.4 REQUIRED)
+#find_package(glfw3 3.4 REQUIRED)
+add_subdirectory(libs/glfw)
 
 # Add OpenGL
 find_package(OpenGL REQUIRED)
@@ -44,6 +43,4 @@ add_executable(${PROJECT_NAME} main.cpp)
 
 # Set executable suffix for cross-compilation
 # Link the libraries
-target_link_libraries(${PROJECT_NAME} terrain chunk  shader image glad OpenGL::GL glfw glm)
-
-
+target_link_libraries(${PROJECT_NAME} terrain shader image glad OpenGL::GL glfw glm)
