@@ -1,2 +1,4 @@
-src/CMakeLists.txt
-src/mingw-w64-toolchain.cmake
+build/linux/CMakeCache.txt
+build/linux/CMakeFiles
+cmake_install.cmake
+Makefile

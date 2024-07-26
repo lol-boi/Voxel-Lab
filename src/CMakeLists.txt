@@ -42,6 +42,5 @@ target_include_directories(glm INTERFACE ${GLM_INCLUDE_DIR})
 # Add the executable
 add_executable(${PROJECT_NAME} main.cpp)
 
-# Set executable suffix for cross-compilation
 # Link the libraries
 target_link_libraries(${PROJECT_NAME} terrain shader image glad OpenGL::GL glfw glm)
