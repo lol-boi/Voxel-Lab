@@ -34,9 +34,10 @@ target_include_directories(terrain PUBLIC libs)
 target_link_libraries(terrain chunk)
 
 # Add GLM library manually
-add_library(glm INTERFACE libs/glm)
-target_include_directories(glm INTERFACE libs/glm)
-target_link_libraries(glm INTERFACE)
+
+add_library(glm INTERFACE)
+set(GLM_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/libs/glm")
+target_include_directories(glm INTERFACE ${GLM_INCLUDE_DIR})
 
 # Add the executable
 add_executable(${PROJECT_NAME} main.cpp)
