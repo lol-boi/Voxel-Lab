@@ -2,7 +2,7 @@
 #include "libs/Terrain.hpp"
 #include <GL/gl.h>
 #include <GL/glext.h>
-#include <GLFW/glfw3.h>
+#include "libs/glfw/include/GLFW/glfw3.h"
 #include "libs/stb_image.h"
 #include <cwchar>
 #include <glm/detail/qualifier.hpp>
@@ -203,8 +203,8 @@ GLFWwindow* init_glfw(){
         return 0;
     }
     glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
+    //glEnable(GL_CULL_FACE);
+    //glCullFace(GL_BACK);
     //glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
     return window;
 }
