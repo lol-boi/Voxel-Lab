@@ -14,8 +14,8 @@ Terrain::Terrain( int c_size, int no_of_chunks){
 }
 
 void Terrain::gen_terrain(float freq1,float freq2,float freq3, float oct1, float oct2, float oct3){
-    //int seed;//random seed
-    FastNoiseLite noise;
+    int seed;//random seed
+    FastNoiseLite noise(seed);
     generation.clear();
     noise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
     for(int i = (-1)*((world_chunk_size/2)*chunk_size); i<(world_chunk_size/2)*chunk_size; i++){
