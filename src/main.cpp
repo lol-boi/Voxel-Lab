@@ -27,7 +27,7 @@ unsigned int compile_shader(unsigned int, const std::string&);
 static unsigned int create_shader(const std::string&, const std::string&);
 GLFWwindow* init_glfw();
 unsigned int set_texture(const char * path, float rgba);
-
+void set_polygon_mode();
 
 const unsigned int SCR_WIDTH = 1500;
 const unsigned int SCR_HEIGHT = 900;
@@ -47,10 +47,11 @@ int main(){
     auto window = init_glfw();
 
     Shader shader_program("../../src/libs/vs.txt","../../src/libs/fs.txt");
-    const char*  texture_path1 = "../../src/res/container.jpg";
+    const char*  texture_path1 = "../../src/res/block.png";
     const char* texture_path2 = "../../src/res/awesomeface.png";
+    //const char* texture_path3 = "../../src/res/up.png";
     unsigned int texture1, texture2;
-    texture1 = set_texture(texture_path1,false);
+    texture1 = set_texture(texture_path1,true);
     texture2 = set_texture(texture_path2,true);
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     shader_program.use();
@@ -150,6 +151,9 @@ void process_input(GLFWwindow *window, float input_dbug){
         if(input_dbug)
             std::cout << "SHIFT" << std::endl;
     }
+    if(glfwGetKey(window, GLFW_KEY_P) ==  GLFW_PRESS){
+        set_polygon_mode();
+    }
 }
 void framebuffer_size_callback(GLFWwindow* window, int width, int height){
        glViewport(0,0,width,height);
@@ -183,7 +187,7 @@ GLFWwindow* init_glfw(){
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     //window is created using glfw and error handling is done
-    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH , SCR_HEIGHT, "Demo OpenGL Title", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH , SCR_HEIGHT, "VoxelLabs", NULL, NULL);
     if(window == NULL){
         std::cout << "ERROR WINDOW NOT INIT" << std::endl;
         glfwTerminate();
@@ -214,8 +218,9 @@ unsigned int set_texture(const char * path, float rgba){
     glBindTexture(GL_TEXTURE_2D, texture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
     int width, height, nr_channels;
     stbi_set_flip_vertically_on_load(true);
@@ -232,4 +237,14 @@ unsigned int set_texture(const char * path, float rgba){
     }
     stbi_image_free(data);
     return texture;
+}
+
+void set_polygon_mode(){
+    static bool state = 1;
+    state = !state;
+    if(state){
+        glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
+    }else{
+        glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
+    }
 }
