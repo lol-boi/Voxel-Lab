@@ -1,4 +1,4 @@
-
+#include <iostream>
 #include "Chunk.hpp"
 #include "glad/include/glad/glad.h"
 #include <glm/ext/vector_float3.hpp>
@@ -15,6 +15,8 @@ namespace std {
     };
 }
 
+
+
 // Direction vectors for the six faces of a cube
 const glm::vec3 faceDirections[] = {
     glm::vec3(-1,  0,  0), // Left
@@ -27,37 +29,37 @@ const glm::vec3 faceDirections[] = {
 
 // Vertices for the six faces of a cube
 const float faceVertices[6][20] = {
-    // Left face
+    // Left face 0
     { -0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
       -0.5f,  0.5f, -0.5f,  1.0f, 0.5f,
       -0.5f,  0.5f,  0.5f,  0.0f, 0.5f,
       -0.5f, -0.5f,  0.5f,  0.0f, 0.0f },
 
-    // Right face
+    // Right face 1
     {  0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
        0.5f,  0.5f, -0.5f,  1.0f, 0.5f,
        0.5f,  0.5f,  0.5f,  0.0f, 0.5f,
        0.5f, -0.5f,  0.5f,  0.0f, 0.0f },
 
-    // Bottom face
+    // Bottom face 2
     { -0.5f, -0.5f, -0.5f,  0.0f, 0.5f,
        0.5f, -0.5f, -0.5f,  1.0f, 0.5f,
        0.5f, -0.5f,  0.5f,  1.0f, 1.0f,
       -0.5f, -0.5f,  0.5f,  0.0f, 1.0f },
 
-    // Top face
+    // Top face 3
     { -0.5f,  0.5f, -0.5f,  0.0f, 0.5f,
        0.5f,  0.5f, -0.5f,  1.0f, 0.5f,
        0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
       -0.5f,  0.5f,  0.5f,  0.0f, 1.0f },
 
-    // Back face
+    // Back face 4
     { -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
        0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
        0.5f,  0.5f, -0.5f,  1.0f, 0.5f,
       -0.5f,  0.5f, -0.5f,  0.0f, 0.5f },
 
-    // Front face
+    // Front face 5
     { -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
        0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
        0.5f,  0.5f,  0.5f,  1.0f, 0.5f,
@@ -73,6 +75,8 @@ const int faceIndices[6][6] = {
     { 0, 1, 2, 2, 3, 0 }, // Back
     { 0, 1, 2, 2, 3, 0 }  // Front
 };
+
+
 
 Chunk::Chunk() {
     glGenBuffers(1, &vbo);
@@ -96,6 +100,54 @@ void Chunk::gen_chunk_data(const std::vector<glm::vec3>& data) {
 }
 
 void Chunk::gen_mesh(const std::vector<glm::vec3>& positions) {
+    int N = 1; //texture atlas index
+    float faceVertices[6][20] = {
+       //left
+       {
+           -0.5f, -0.5f, -0.5f, 0.75f, (N-1) * 0.0625f,
+           -0.5f, -0.5f,  0.5f,  1.0f, (N-1) * 0.0625f,
+           -0.5f,  0.5f,  0.5f,  1.0f,  (N) * 0.0625f,
+           -0.5f,  0.5f, -0.5f,  0.75f, (N) * 0.0625f
+       },
+
+       //right
+       {
+           0.5f, -0.5f,  0.5f, 0.75f, (N-1) * 0.0625f,
+           0.5f, -0.5f, -0.5f,  1.0f, (N-1) * 0.0625f,
+           0.5f,  0.5f, -0.5f,  1.0f,  (N) * 0.0625f,
+           0.5f,  0.5f,  0.5f,  0.75f, (N) * 0.0625f
+       },
+
+       //bottom
+       {
+            0.5f, -0.5f,  0.5f, 0.25f, (N-1) * 0.0625f,
+           -0.5f, -0.5f,  0.5f, 0.5f,  (N-1) * 0.0625f,
+           -0.5f, -0.5f, -0.5f, 0.5f,  N * 0.0625f,
+            0.5f, -0.5f, -0.5f, 0.25f, N * 0.0625f
+       },
+
+       //top
+       {
+           -0.5f, 0.5f,  0.5f, 0.0f, (N-1) * 0.0625f,
+            0.5f, 0.5f,  0.5f, 0.25f,  (N-1) * 0.0625f,
+            0.5f, 0.5f, -0.5f, 0.25f,  N * 0.0625f,
+            -0.5f, 0.5f, -0.5f, 0.0f, N * 0.0625f
+       },
+       //back
+       {
+            0.5f, -0.5f, -0.5f, 0.5f, (N-1) * 0.0625f,
+           -0.5f, -0.5f, -0.5f, 0.75f, (N-1) * 0.0625f,
+           -0.5f,  0.5f, -0.5f, 0.75f, (N) * 0.0625f,
+            0.5f,  0.5f, -0.5f, 0.5f, (N) * 0.0625f
+       },
+       //front
+       {
+            -0.5f, -0.5f, 0.5f, 0.5f, (N-1) * 0.0625f,
+           0.5f, -0.5f, 0.5f, 0.75f,  (N-1) * 0.0625f,
+           0.5f,  0.5f, 0.5f, 0.75f, (N) * 0.0625f,
+            -0.5f,  0.5f, 0.5f, 0.5f, (N) * 0.0625f
+       }
+    };
     // Clear previous data
     vertices.clear();
     indices.clear();
@@ -115,6 +167,7 @@ void Chunk::gen_mesh(const std::vector<glm::vec3>& positions) {
                     vertices.push_back(faceVertices[face][i + 2] + pos.z);
                     vertices.push_back(faceVertices[face][i + 3]);
                     vertices.push_back(faceVertices[face][i + 4]);
+
                 }
 
                 int base_index = vertices.size() / 5 - 4;

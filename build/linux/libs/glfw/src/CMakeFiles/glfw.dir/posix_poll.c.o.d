@@ -1,10 +1,10 @@
 libs/glfw/src/CMakeFiles/glfw.dir/posix_poll.c.o: \
- /home/silva/projects/voxel_lab/src/libs/glfw/src/posix_poll.c \
+ /home/silva/projects/Voxel-Lab/src/libs/glfw/src/posix_poll.c \
  /usr/include/stdc-predef.h \
- /home/silva/projects/voxel_lab/src/libs/glfw/src/internal.h \
- /home/silva/projects/voxel_lab/src/libs/glfw/src/../include/GLFW/glfw3.h \
- /usr/lib/gcc/x86_64-pc-linux-gnu/14.1.1/include/stddef.h \
- /usr/lib/gcc/x86_64-pc-linux-gnu/14.1.1/include/stdint.h \
+ /home/silva/projects/Voxel-Lab/src/libs/glfw/src/internal.h \
+ /home/silva/projects/Voxel-Lab/src/libs/glfw/src/../include/GLFW/glfw3.h \
+ /usr/lib/gcc/x86_64-pc-linux-gnu/14.2.1/include/stddef.h \
+ /usr/lib/gcc/x86_64-pc-linux-gnu/14.2.1/include/stdint.h \
  /usr/include/stdint.h /usr/include/bits/libc-header-start.h \
  /usr/include/features.h /usr/include/features-time64.h \
  /usr/include/bits/wordsize.h /usr/include/bits/timesize.h \
@@ -14,9 +14,9 @@ libs/glfw/src/CMakeFiles/glfw.dir/posix_poll.c.o: \
  /usr/include/bits/time64.h /usr/include/bits/wchar.h \
  /usr/include/bits/stdint-intn.h /usr/include/bits/stdint-uintn.h \
  /usr/include/bits/stdint-least.h \
- /home/silva/projects/voxel_lab/src/libs/glfw/src/platform.h \
- /home/silva/projects/voxel_lab/src/libs/glfw/src/null_platform.h \
- /home/silva/projects/voxel_lab/src/libs/glfw/src/wl_platform.h \
+ /home/silva/projects/Voxel-Lab/src/libs/glfw/src/platform.h \
+ /home/silva/projects/Voxel-Lab/src/libs/glfw/src/null_platform.h \
+ /home/silva/projects/Voxel-Lab/src/libs/glfw/src/wl_platform.h \
  /usr/include/wayland-client-core.h /usr/include/wayland-util.h \
  /usr/include/math.h /usr/include/bits/math-vector.h \
  /usr/include/bits/libm-simd-decl-stubs.h /usr/include/bits/floatn.h \
@@ -25,7 +25,7 @@ libs/glfw/src/CMakeFiles/glfw.dir/posix_poll.c.o: \
  /usr/include/bits/mathcalls-helper-functions.h \
  /usr/include/bits/mathcalls.h /usr/include/bits/mathcalls-narrow.h \
  /usr/include/bits/iscanonical.h /usr/include/inttypes.h \
- /usr/lib/gcc/x86_64-pc-linux-gnu/14.1.1/include/stdarg.h \
+ /usr/lib/gcc/x86_64-pc-linux-gnu/14.2.1/include/stdarg.h \
  /usr/include/wayland-version.h /usr/include/xkbcommon/xkbcommon.h \
  /usr/include/stdio.h /usr/include/bits/types/__fpos_t.h \
  /usr/include/bits/types/__mbstate_t.h \
@@ -36,14 +36,14 @@ libs/glfw/src/CMakeFiles/glfw.dir/posix_poll.c.o: \
  /usr/include/xkbcommon/xkbcommon-keysyms.h \
  /usr/include/xkbcommon/xkbcommon-compat.h \
  /usr/include/xkbcommon/xkbcommon-compose.h \
- /usr/lib/gcc/x86_64-pc-linux-gnu/14.1.1/include/stdbool.h \
- /home/silva/projects/voxel_lab/src/libs/glfw/src/xkb_unicode.h \
- /home/silva/projects/voxel_lab/src/libs/glfw/src/posix_poll.h \
+ /usr/lib/gcc/x86_64-pc-linux-gnu/14.2.1/include/stdbool.h \
+ /home/silva/projects/Voxel-Lab/src/libs/glfw/src/xkb_unicode.h \
+ /home/silva/projects/Voxel-Lab/src/libs/glfw/src/posix_poll.h \
  /usr/include/poll.h /usr/include/sys/poll.h /usr/include/bits/poll.h \
  /usr/include/bits/types/__sigset_t.h \
  /usr/include/bits/types/struct_timespec.h /usr/include/bits/endian.h \
  /usr/include/bits/endianness.h /usr/include/bits/types/time_t.h \
- /home/silva/projects/voxel_lab/src/libs/glfw/src/x11_platform.h \
+ /home/silva/projects/Voxel-Lab/src/libs/glfw/src/x11_platform.h \
  /usr/include/unistd.h /usr/include/bits/posix_opt.h \
  /usr/include/bits/environments.h /usr/include/bits/confname.h \
  /usr/include/bits/getopt_posix.h /usr/include/bits/getopt_core.h \
@@ -84,8 +84,8 @@ libs/glfw/src/CMakeFiles/glfw.dir/posix_poll.c.o: \
  /usr/include/X11/extensions/xfixeswire.h \
  /usr/include/X11/extensions/shape.h \
  /usr/include/X11/extensions/shapeconst.h \
- /home/silva/projects/voxel_lab/src/libs/glfw/src/null_joystick.h \
- /home/silva/projects/voxel_lab/src/libs/glfw/src/linux_joystick.h \
+ /home/silva/projects/Voxel-Lab/src/libs/glfw/src/null_joystick.h \
+ /home/silva/projects/Voxel-Lab/src/libs/glfw/src/linux_joystick.h \
  /usr/include/linux/input.h /usr/include/sys/time.h \
  /usr/include/sys/ioctl.h /usr/include/bits/ioctls.h \
  /usr/include/asm/ioctls.h /usr/include/asm-generic/ioctls.h \
@@ -99,7 +99,7 @@ libs/glfw/src/CMakeFiles/glfw.dir/posix_poll.c.o: \
  /usr/include/asm/posix_types_64.h /usr/include/asm-generic/posix_types.h \
  /usr/include/linux/input-event-codes.h /usr/include/linux/limits.h \
  /usr/include/regex.h \
- /home/silva/projects/voxel_lab/src/libs/glfw/src/posix_thread.h \
+ /home/silva/projects/Voxel-Lab/src/libs/glfw/src/posix_thread.h \
  /usr/include/pthread.h /usr/include/sched.h /usr/include/bits/sched.h \
  /usr/include/bits/types/struct_sched_param.h /usr/include/bits/cpu-set.h \
  /usr/include/time.h /usr/include/bits/time.h /usr/include/bits/timex.h \
@@ -109,8 +109,8 @@ libs/glfw/src/CMakeFiles/glfw.dir/posix_poll.c.o: \
  /usr/include/bits/setjmp.h \
  /usr/include/bits/types/struct___jmp_buf_tag.h \
  /usr/include/bits/pthread_stack_min-dynamic.h \
- /home/silva/projects/voxel_lab/src/libs/glfw/src/posix_time.h \
- /home/silva/projects/voxel_lab/src/libs/glfw/src/../include/GLFW/glfw3native.h \
+ /home/silva/projects/Voxel-Lab/src/libs/glfw/src/posix_time.h \
+ /home/silva/projects/Voxel-Lab/src/libs/glfw/src/../include/GLFW/glfw3native.h \
  /usr/include/errno.h /usr/include/bits/errno.h \
  /usr/include/linux/errno.h /usr/include/asm/errno.h \
  /usr/include/asm-generic/errno.h /usr/include/asm-generic/errno-base.h \

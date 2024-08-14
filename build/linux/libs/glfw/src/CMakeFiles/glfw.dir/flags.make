@@ -4,7 +4,7 @@
 # compile C with /usr/bin/cc
 C_DEFINES = -DHAVE_MEMFD_CREATE -D_DEFAULT_SOURCE -D_GLFW_WAYLAND -D_GLFW_X11
 
-C_INCLUDES = -I/home/silva/projects/voxel_lab/src/libs/glfw/include -I/home/silva/projects/voxel_lab/src/libs/glfw/src -I/home/silva/projects/voxel_lab/build/linux/libs/glfw/src
+C_INCLUDES = -I/home/silva/projects/Voxel-Lab/src/libs/glfw/include -I/home/silva/projects/Voxel-Lab/src/libs/glfw/src -I/home/silva/projects/Voxel-Lab/build/linux/libs/glfw/src
 
 C_FLAGS = -std=c99 -fPIC -Wall
 
