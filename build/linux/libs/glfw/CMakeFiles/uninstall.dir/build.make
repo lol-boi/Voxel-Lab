@@ -53,10 +53,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/silva/projects/voxel_lab/src
+CMAKE_SOURCE_DIR = /home/silva/projects/Voxel-Lab/src
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/silva/projects/voxel_lab/build/linux
+CMAKE_BINARY_DIR = /home/silva/projects/Voxel-Lab/build/linux
 
 # Utility rule file for uninstall.
 
@@ -67,7 +67,7 @@ include libs/glfw/CMakeFiles/uninstall.dir/compiler_depend.make
 include libs/glfw/CMakeFiles/uninstall.dir/progress.make
 
 libs/glfw/CMakeFiles/uninstall:
-	cd /home/silva/projects/voxel_lab/build/linux/libs/glfw && /usr/bin/cmake -P /home/silva/projects/voxel_lab/build/linux/libs/glfw/cmake_uninstall.cmake
+	cd /home/silva/projects/Voxel-Lab/build/linux/libs/glfw && /usr/bin/cmake -P /home/silva/projects/Voxel-Lab/build/linux/libs/glfw/cmake_uninstall.cmake
 
 uninstall: libs/glfw/CMakeFiles/uninstall
 uninstall: libs/glfw/CMakeFiles/uninstall.dir/build.make
@@ -78,10 +78,10 @@ libs/glfw/CMakeFiles/uninstall.dir/build: uninstall
 .PHONY : libs/glfw/CMakeFiles/uninstall.dir/build
 
 libs/glfw/CMakeFiles/uninstall.dir/clean:
-	cd /home/silva/projects/voxel_lab/build/linux/libs/glfw && $(CMAKE_COMMAND) -P CMakeFiles/uninstall.dir/cmake_clean.cmake
+	cd /home/silva/projects/Voxel-Lab/build/linux/libs/glfw && $(CMAKE_COMMAND) -P CMakeFiles/uninstall.dir/cmake_clean.cmake
 .PHONY : libs/glfw/CMakeFiles/uninstall.dir/clean
 
 libs/glfw/CMakeFiles/uninstall.dir/depend:
-	cd /home/silva/projects/voxel_lab/build/linux && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/silva/projects/voxel_lab/src /home/silva/projects/voxel_lab/src/libs/glfw /home/silva/projects/voxel_lab/build/linux /home/silva/projects/voxel_lab/build/linux/libs/glfw /home/silva/projects/voxel_lab/build/linux/libs/glfw/CMakeFiles/uninstall.dir/DependInfo.cmake "--color=$(COLOR)"
+	cd /home/silva/projects/Voxel-Lab/build/linux && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/silva/projects/Voxel-Lab/src /home/silva/projects/Voxel-Lab/src/libs/glfw /home/silva/projects/Voxel-Lab/build/linux /home/silva/projects/Voxel-Lab/build/linux/libs/glfw /home/silva/projects/Voxel-Lab/build/linux/libs/glfw/CMakeFiles/uninstall.dir/DependInfo.cmake "--color=$(COLOR)"
 .PHONY : libs/glfw/CMakeFiles/uninstall.dir/depend
 

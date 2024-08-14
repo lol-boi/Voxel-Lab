@@ -14,7 +14,7 @@ Terrain::Terrain( int c_size, int no_of_chunks){
 }
 
 void Terrain::gen_terrain(float freq1,float freq2,float freq3, float oct1, float oct2, float oct3){
-    int seed;//random seed
+    int seed;
     FastNoiseLite noise(seed);
     generation.clear();
     noise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
@@ -46,6 +46,7 @@ void Terrain::init_world_chunks(){
                     }
                 }
             }
+            chunk_positions.push_back(glm::vec3(0,100,0));
             Chunk c;
             c.gen_chunk_data(chunk_positions);
             world_chunks.push_back(c);

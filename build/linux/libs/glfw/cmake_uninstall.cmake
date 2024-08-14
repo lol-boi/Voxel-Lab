@@ -1,9 +1,9 @@
 
-if (NOT EXISTS "/home/silva/projects/voxel_lab/build/linux/libs/glfw/install_manifest.txt")
-    message(FATAL_ERROR "Cannot find install manifest: \"/home/silva/projects/voxel_lab/build/linux/libs/glfw/install_manifest.txt\"")
+if (NOT EXISTS "/home/silva/projects/Voxel-Lab/build/linux/libs/glfw/install_manifest.txt")
+    message(FATAL_ERROR "Cannot find install manifest: \"/home/silva/projects/Voxel-Lab/build/linux/libs/glfw/install_manifest.txt\"")
 endif()
 
-file(READ "/home/silva/projects/voxel_lab/build/linux/libs/glfw/install_manifest.txt" files)
+file(READ "/home/silva/projects/Voxel-Lab/build/linux/libs/glfw/install_manifest.txt" files)
 string(REGEX REPLACE "\n" ";" files "${files}")
 
 foreach (file ${files})

@@ -36,7 +36,7 @@ float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
 //camera
-Camera camera(glm::vec3(80.0f, 80.0f, 80.0f), glm::vec3(0.0f,1.0f,0.0f), -90.0f, 10.0f);
+Camera camera(glm::vec3(0.0f, 100.0f, 0.0f), glm::vec3(0.0f,1.0f,0.0f), -90.0f, 10.0f);
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT/ 2.0f;
 bool firstMouse = true;
@@ -48,7 +48,7 @@ int main(){
 
     Shader shader_program("../../src/libs/vs.txt","../../src/libs/fs.txt");
     const char*  texture_path1 = "../../src/res/block.png";
-    const char* texture_path2 = "../../src/res/awesomeface.png";
+    const char* texture_path2 = "../../src/res/atlas1.png";
     //const char* texture_path3 = "../../src/res/up.png";
     unsigned int texture1, texture2;
     texture1 = set_texture(texture_path1,true);
@@ -207,8 +207,8 @@ GLFWwindow* init_glfw(){
         return 0;
     }
     glEnable(GL_DEPTH_TEST);
-    //glEnable(GL_CULL_FACE);
-    //glCullFace(GL_BACK);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
     //glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
     return window;
 }
