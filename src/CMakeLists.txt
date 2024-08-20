@@ -1,7 +1,5 @@
-
 cmake_minimum_required(VERSION 3.29)
 project(voxel_lab)
-
 
 # Add GLFW3
 #find_package(glfw3 3.4 REQUIRED)
@@ -34,7 +32,6 @@ target_include_directories(terrain PUBLIC libs)
 target_link_libraries(terrain chunk)
 
 # Add GLM library manually
-
 add_library(glm INTERFACE)
 set(GLM_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/libs/glm")
 target_include_directories(glm INTERFACE ${GLM_INCLUDE_DIR})

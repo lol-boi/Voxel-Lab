@@ -5,16 +5,16 @@
 #include <vector>
 
 class Terrain{
-    std::vector<std::vector<int>> generation; // to store world gen data
-    int chunk_size;
-    int world_chunk_size;
+    int chunk_size;  //default val is 32
+    int world_size_in_chunks;
+    int world_seed;
+    //its value is in one dimention so the final world will be of world_size_in_chunks * 8 * world_size_in_chunks
+    //val of world_size_in_chunks should be even if not 1 will be added to make it even
     int world_size;
 
-
     public:
-    Terrain(int c_size,int no_of_chunks);
+    Terrain(int no_of_chunks,int seed,int c_size);
     std::vector<Chunk> world_chunks;
-    void gen_terrain(float freq1,float freq2,float freq3,float oct1,float oct2, float oct3);
     void init_world_chunks();
     void draw_terrain();
 };
