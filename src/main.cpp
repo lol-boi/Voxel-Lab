@@ -1,5 +1,7 @@
 #include "libs/glad/include/glad/glad.h"
+
 #include "libs/Terrain.hpp"
+
 #include <GL/gl.h>
 #include <GL/glext.h>
 #include "libs/glfw/include/GLFW/glfw3.h"
@@ -36,7 +38,7 @@ float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
 //camera
-Camera camera(glm::vec3(0.0f, 100.0f, 0.0f), glm::vec3(0.0f,1.0f,0.0f), -90.0f, 10.0f);
+Camera camera(glm::vec3(0.0f, 130.0f, 0.0f), glm::vec3(0.0f,1.0f,0.0f), -90.0f, 10.0f);
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT/ 2.0f;
 bool firstMouse = true;
@@ -58,11 +60,8 @@ int main(){
     shader_program.set_int("texture1", 0);
     shader_program.set_int("texture2", 1);
 
-    Terrain t(16,8);
-    t.gen_terrain(1.0f,2.0f,4.0f,  1.0f,0.5f,0.25f);
-    t.init_world_chunks();
-
-
+   Terrain terrain = Terrain(8,123123,32);
+   terrain.init_world_chunks();
 
     while(!glfwWindowShouldClose(window)){
         //event/input handeling
@@ -84,7 +83,6 @@ int main(){
 
         shader_program.use();
 
-
         glm::mat4 model = glm::mat4(1.0f);
         unsigned int model_loc = glGetUniformLocation(shader_program.ID, "model");
         glUniformMatrix4fv(model_loc, 1, GL_FALSE, &model[0][0]);
@@ -100,7 +98,7 @@ int main(){
         unsigned int view_loc = glGetUniformLocation(shader_program.ID, "view");
         glUniformMatrix4fv(view_loc, 1, GL_FALSE, &view[0][0]);
 
-        t.draw_terrain();
+        terrain.draw_terrain();
 
        // swaps the buffer swaps the colour buffer(a buffer which contais the
        // colour val of each rendering pixel) and show it to the screen

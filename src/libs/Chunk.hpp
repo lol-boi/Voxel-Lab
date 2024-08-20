@@ -1,6 +1,7 @@
 
 #ifndef CHUNK_HPP
 #define CHUNK_HPP
+#include <glm/detail/qualifier.hpp>
 #include <vector>
 #include <glm/ext/vector_float3.hpp>
 
@@ -9,15 +10,19 @@
 
 class Chunk {
 private:
+    glm::vec3 chunk_pos_in_world;
     unsigned int vao, vbo, ebo;
+    int *chunk_data;
     std::vector<float> vertices;
     std::vector<int> indices;
-
-    void gen_mesh(const std::vector<glm::vec3>& positions); // New method for meshing
+    void gen_mesh(int);
+    int get_height(int, int, int);// New method for meshing
 
 public:
-    Chunk();
-    void gen_chunk_data(const std::vector<glm::vec3>& data);
+    Chunk(glm::vec3);
+    //~Chunk();
+    void update_mesh();
+    void gen_chunk_data(int, int);
     void draw();
 };
 

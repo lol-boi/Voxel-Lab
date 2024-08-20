@@ -3,53 +3,28 @@
 #include <cwchar>
 #include <vector>
 #include "Chunk.hpp"
-#include "FastNoiseLite.h"
 #include <cmath>
 
 
-Terrain::Terrain( int c_size, int no_of_chunks){
-   world_chunk_size  = no_of_chunks;
-   chunk_size = c_size;
-   world_size = chunk_size * no_of_chunks;
+Terrain::Terrain(int no_of_chunks,int seed,  int c_size = 32){
+    if(no_of_chunks % 2 != 0){
+        no_of_chunks += 1;
+    }
+    world_size_in_chunks  = no_of_chunks;
+    chunk_size = c_size;
+    world_size = chunk_size * no_of_chunks;
+    world_seed = seed;
 }
 
-void Terrain::gen_terrain(float freq1,float freq2,float freq3, float oct1, float oct2, float oct3){
-    int seed;
-    FastNoiseLite noise(seed);
-    generation.clear();
-    noise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
-    for(int i = (-1)*((world_chunk_size/2)*chunk_size); i<(world_chunk_size/2)*chunk_size; i++){
-        std::vector<int> tmp;
-        for(int j = (-1)*((world_chunk_size/2)*chunk_size); j< (world_chunk_size/2) * chunk_size; j ++){
-            float height =
-                    oct1 * noise.GetNoise(freq1*(float)i,freq1*(float)j) +
-                    oct2 * noise.GetNoise(freq2*(float)i,freq2*(float)j) +
-                    oct3 * noise.GetNoise(freq3*(float)i,freq3*(float)j);
-            height = (int)((height+1)*9.75 + 60);
-            tmp.push_back(height);
-        }
-        generation.push_back(tmp);
-    }
-}
 
 void Terrain::init_world_chunks(){
-    world_chunks.clear();
-    for(int cx = 0; cx<world_chunk_size;cx++){
-        for(int cy = 0; cy<world_chunk_size; cy++){
-            std::vector<glm::vec3> chunk_positions;
-            for(int x = 0; x<chunk_size; ++x){
-                for(int z = 0; z<chunk_size; ++z){
-                    int height = generation[(cx*chunk_size)+x][(cy*chunk_size)+z];
-                    for(int y = 0; y<=height; y++){
-                        glm::vec3 pos((cx*chunk_size)+x,y,(cy*chunk_size)+z);
-                        chunk_positions.push_back(pos);
-                    }
-                }
+    for(int x = 0; x<world_size_in_chunks; x++){
+        for(int y = 0; y<8; y++){
+            for(int z = 0; z<world_size_in_chunks; z++){
+               Chunk chunk = Chunk(glm::vec3(x,y,z));
+               chunk.gen_chunk_data(chunk_size,world_seed);
+               world_chunks.push_back(chunk);
             }
-            chunk_positions.push_back(glm::vec3(0,100,0));
-            Chunk c;
-            c.gen_chunk_data(chunk_positions);
-            world_chunks.push_back(c);
         }
     }
 }
