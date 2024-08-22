@@ -16,7 +16,6 @@ private:
     std::vector<float> vertices;
     std::vector<int> indices;
     void gen_mesh(int);
-    int get_height(int, int, int, int);// New method for meshing
 
 public:
     int get_height(int, int);
