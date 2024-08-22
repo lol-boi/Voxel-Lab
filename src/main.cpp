@@ -38,7 +38,7 @@ float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
 //camera
-Camera camera(glm::vec3(0.0f, 130.0f, 0.0f), glm::vec3(0.0f,1.0f,0.0f), -90.0f, 10.0f);
+Camera camera(glm::vec3(0.0f, 256.0f, 0.0f), glm::vec3(0.0f,1.0f,0.0f), -90.0f, 10.0f);
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT/ 2.0f;
 bool firstMouse = true;
@@ -60,7 +60,7 @@ int main(){
     shader_program.set_int("texture1", 0);
     shader_program.set_int("texture2", 1);
 
-   Terrain terrain = Terrain(8,123123,32);
+   Terrain terrain = Terrain(8,123,32);
    terrain.init_world_chunks();
 
     while(!glfwWindowShouldClose(window)){
@@ -88,7 +88,7 @@ int main(){
         glUniformMatrix4fv(model_loc, 1, GL_FALSE, &model[0][0]);
 
         glm::mat4 projection = glm::mat4(1.0f);
-        projection = glm::perspective(glm::radians(45.0f),(float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+        projection = glm::perspective(glm::radians(45.0f),(float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 256.0f);
         unsigned int projcetion_loc = glGetUniformLocation(shader_program.ID, "projection");
         glUniformMatrix4fv(projcetion_loc, 1, GL_FALSE, &projection[0][0]);
 
