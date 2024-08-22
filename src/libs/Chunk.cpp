@@ -33,18 +33,32 @@ Chunk::Chunk(glm::vec3 pos) {
 
     glBindVertexArray(0);
 }
+int Chunk::get_height(int c_size, int x, int y, int seed){
+   chunk_data = new int[c_size*c_size*c_size];
 
+    float oct1 = 1, oct2 = .5f, oct3 = .25;
+    float freq1 = 1, freq2 = 2, freq3  = 4;
+
+    FastNoiseLite noise(seed);
+    noise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
+
+    float height =
+          oct1 * noise.GetNoise(freq1*(float)x,freq1*(float)y) +
+            oct2 * noise.GetNoise(freq2*(float)x,freq2*(float)y) +
+            oct3 * noise.GetNoise(freq3*(float)x,freq3*(float)y);
+    height = height /(oct1 + oct2 + oct3);
+    height = (int) ((x+1) * 256/2);
+
+    return height;
+}
 //Chunk::~Chunk(){
 //    delete[] chunk_data;
 //}
 void Chunk::gen_chunk_data(int c_size, int seed){
     chunk_data = new int[c_size * c_size * c_size];
-    FastNoiseLite noise(seed);
-    noise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
     for(int x = 0; x<c_size; x++){
         for(int z = 0; z<c_size;  z++){
-            int height = noise.GetNoise((chunk_pos_in_world.x * c_size) + x , (chunk_pos_in_world.z * c_size) + z);
-            height = ((height + 1) * c_size * 8) / 2;
+            int height = get_height(c_size, (chunk_pos_in_world.x * c_size) + x , (chunk_pos_in_world.z * c_size) + z, seed);
             for(int y = (c_size*chunk_pos_in_world.y); y<(c_size * (chunk_pos_in_world.y + 1)); y++){
                 int index = (c_size * c_size * (y-(c_size * chunk_pos_in_world.y))) + (c_size * z) + x;
                 if(height >= y){
