@@ -29,7 +29,7 @@ target_link_libraries(chunk glad)
 # Add terrain library
 add_library(terrain SHARED libs/Terrain.cpp)
 target_include_directories(terrain PUBLIC libs)
-target_link_libraries(terrain chunk)
+target_link_libraries(terrain chunk glad)
 
 # Add GLM library manually
 add_library(glm INTERFACE)

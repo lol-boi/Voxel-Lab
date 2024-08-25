@@ -1,4 +1,6 @@
+
 #include "Terrain.hpp"
+#include "glad/include/glad/glad.h"
 #include <cstdlib>
 #include <cwchar>
 #include <vector>
@@ -28,8 +30,10 @@ void Terrain::init_world_chunks(){
         }
     }
 }
-void Terrain::draw_terrain(){
+void Terrain::draw_terrain(unsigned int shader_program_id, int chunk_world_pos){
     for(Chunk &chunk : world_chunks){
+        glUseProgram(shader_program_id);
+        glUniform3f(chunk_world_pos, chunk.chunk_pos_in_world.x, chunk.chunk_pos_in_world.y, chunk.chunk_pos_in_world.z);
         chunk.draw();
     }
 }
