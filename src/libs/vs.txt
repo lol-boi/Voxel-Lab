@@ -1,18 +1,35 @@
+
 #version 330 core
 
-layout (location = 0) in vec3 aPos;       // The position variable has attribute position 0
-layout (location = 1) in vec2 aTexCoord;  // The texture coordinate variable has attribute position 1
-layout (location = 2) in vec3 aOffset;    // The offset variable has attribute position 2
+layout (location = 0) in int data;
 
-out vec2 TexCoord;
+out vec2 tex_coord;
 
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
+uniform vec3 chunk_coords;
 
 void main()
 {
-    // Calculate the final position of the vertex
-    gl_Position = projection * view * model * vec4(aPos + aOffset, 1.0);
-    TexCoord = aTexCoord;
+    float pos_x = data & 63;
+    pos_x += chunk_coords.x * 32;
+
+    float pos_y = (data >> 6) & 63;
+    pos_y += chunk_coords.y * 32;
+
+    float pos_z = (data >> 12) & 63;
+    pos_z += chunk_coords.z * 32;
+
+    //int normal = (data >> 18) & 7;
+    //int texture = (data >> 21) & 15;
+    float u = float((data >> 22) & 1);
+    float v = float((data >> 23) & 1);
+
+    vec3 aPos = vec3(pos_x, pos_y, pos_z);
+
+    // Map the texture coordinates
+    tex_coord = vec2(u, v);
+
+    gl_Position = projection * view * model * vec4(aPos, 1.0);
 }

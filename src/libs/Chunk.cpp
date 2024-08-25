@@ -1,20 +1,14 @@
 #include "Chunk.hpp"
 #include "glad/include/glad/glad.h"
 #include "FastNoiseLite.h"
+#include <bits/types/clockid_t.h>
 #include <glm/ext/vector_float3.hpp>
 #include <vector>
 
-// Indices for the six faces of a cube
-const int faceIndices[6][6] = {
-    { 0, 1, 2, 2, 3, 0 }, // Left
-    { 0, 1, 2, 2, 3, 0 }, // Right
-    { 0, 1, 2, 2, 3, 0 }, // Bottom
-    { 0, 1, 2, 2, 3, 0 }, // Top
-    { 0, 1, 2, 2, 3, 0 }, // Back
-    { 0, 1, 2, 2, 3, 0 }  // Front
+
+const int faceIndices[6] = {
+     0, 1, 2, 2, 3, 0
 };
-
-
 
 Chunk::Chunk(glm::vec3 pos) {
     chunk_pos_in_world = pos;
@@ -24,18 +18,14 @@ Chunk::Chunk(glm::vec3 pos) {
     glBindVertexArray(vao);
 
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (void*)0);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (void*)(3 * sizeof(float)));
+    glVertexAttribIPointer(0, 1, GL_INT, sizeof(int), (void*)0);
     glEnableVertexAttribArray(0);
-    glEnableVertexAttribArray(1);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
 
     glBindVertexArray(0);
 }
-//Chunk::~Chunk(){
-//    delete[] chunk_data;
-//}
+
 void Chunk::gen_chunk_data(int c_size, int seed){
 
     chunk_data = new int[c_size*c_size*c_size];
@@ -84,15 +74,24 @@ void Chunk::gen_chunk_data(int c_size, int seed){
                     chunk_data[index] = 0;
                 }
             }
-            //std::cout << height << " "; //debug
         }
-        //std::cout << std::endl; //debug
     }
     gen_mesh(c_size);
 }
 
-void Chunk::gen_mesh(int c_size) {
+int Chunk:: pack_data(int x, int y, int z, int normal, int texture,int u, int v) {
+    int data = 0;
+    data |= (x & 63);
+    data |= (y & 63) << 6;
+    data |= (z & 63) << 12;
+    data |= (normal & 7) << 18;
+    data |= (texture & 15) << 21;
+    data |= (u & 1) << 22;
+    data |= (v & 1) << 23;
+    return data;
+}
 
+void Chunk::gen_mesh(int c_size) {
     // Clear previous data
     vertices.clear();
     indices.clear();
@@ -111,118 +110,106 @@ void Chunk::gen_mesh(int c_size) {
                    bool top = (y < c_size-1 ) ? !chunk_data[index + (c_size * c_size)] : true;
                    bool bottom = (y > 0) ? !chunk_data[index - (c_size * c_size)] : true;
 
-                   int a,b,c;
-                   a = x + (chunk_pos_in_world.x * c_size);
-                   b = y + (chunk_pos_in_world.y * c_size);
-                   c = z + (chunk_pos_in_world.z * c_size);
-                   if(left){ //left
-                        float face[] = {
-                           -0.5f + a, -0.5f + b, -0.5f + c, 0.75f, (N-1) * 0.0625f,
-                           -0.5f + a, -0.5f + b,  0.5f + c,  1.0f, (N-1) * 0.0625f,
-                           -0.5f + a,  0.5f + b,  0.5f + c,  1.0f,  (N) * 0.0625f,
-                           -0.5f + a,  0.5f + b, -0.5f + c,  0.75f, (N) * 0.0625f };
+                   int face[4];
 
-                        for(int i = 0; i<20; i+=5){
-                            vertices.push_back(face[i+0]);
-                            vertices.push_back(face[i+1]);
-                            vertices.push_back(face[i+2]);
-                            vertices.push_back(face[i+3]);
-                            vertices.push_back(face[i+4]);
+                   if(left){
+
+                        face[0] = pack_data(x,y,z+1,0,N,0,0);
+                        face[1] = pack_data(x,y,z,0,N,1,0);
+                        face[2] = pack_data(x,y+1,z,0,N,1,1);
+                        face[3] = pack_data(x,y+1,z+1,0,N,0,1);
+
+                        int base_index = vertices.size();
+                        for(int i = 0; i<4; i++){
+                            vertices.push_back(face[i]);
                         }
-                        int base_index = vertices.size()/ 5 - 4;
                         for(int i = 0; i<6; ++i){
-                           indices.push_back(faceIndices[0][i] + base_index);
+                           indices.push_back(faceIndices[i] + base_index);
                         }
                    }
-                   if(right){ //right
-                       float face[] = {
-                           0.5f + a, -0.5f + b,  0.5f + c, 0.75f, (N-1) * 0.0625f,
-                           0.5f + a, -0.5f + b, -0.5f + c,  1.0f, (N-1) * 0.0625f,
-                           0.5f + a,  0.5f + b, -0.5f + c,  1.0f,  (N) * 0.0625f,
-                           0.5f + a,  0.5f + b,  0.5f + c,  0.75f, (N) * 0.0625f };
+                   if(right){
 
-                       for(int i = 0; i<20; i+=5){
-                           vertices.push_back(face[i+0]);
-                           vertices.push_back(face[i+1]);
-                           vertices.push_back(face[i+2]);
-                           vertices.push_back(face[i+3]);
-                           vertices.push_back(face[i+4]);
+
+
+                       face[0] = pack_data(x+1,y,z+0,1,N,0,0);
+                       face[1] = pack_data(x+1,y,z+1,1,N,1,0);
+                       face[2] = pack_data(x+1,y+1,z+1,1,N,1,1);
+                       face[3] = pack_data(x+1,y+1,z,1,N,0,1);
+
+                       int base_index = vertices.size();
+
+                       for(int i = 0; i<4; i++){
+                           vertices.push_back(face[i]);
                        }
-                       int base_index = vertices.size()/ 5 - 4;
                        for(int i = 0; i<6; ++i){
-                           indices.push_back(faceIndices[1][i] + base_index);
+                           indices.push_back(faceIndices[i] + base_index);
                        }
                    }
-                   if(back){ //front
-                        float face[] = {
-                        -0.5f + a, -0.5f + b, 0.5f + c, 0.5f, (N-1) * 0.0625f,
-                         0.5f + a, -0.5f + b, 0.5f + c, 0.75f,  (N-1) * 0.0625f,
-                         0.5f + a,  0.5f + b, 0.5f + c, 0.75f, (N) * 0.0625f,
-                        -0.5f + a,  0.5f + b, 0.5f + c, 0.5f, (N) * 0.0625f };
-                        for(int i = 0; i<20; i+=5){
-                            vertices.push_back(face[i+0]);
-                            vertices.push_back(face[i+1]);
-                            vertices.push_back(face[i+2]);
-                            vertices.push_back(face[i+3]);
-                            vertices.push_back(face[i+4]);
+
+
+                   if(back){
+
+
+
+                       face[0] = pack_data(x+1,y,z+1,2,N,0,0);
+                       face[1] = pack_data(x,y,z+1,2,N,1,0);
+                       face[2] = pack_data(x,y+1,z+1,2,N,1,1);
+                       face[3] = pack_data(x+1,y+1,z+1,2,N,0,1);
+
+                       int base_index = vertices.size();
+                       for(int i = 0; i<4; i++){
+                            vertices.push_back(face[i]);
                         }
-                        int base_index = vertices.size()/ 5 - 4;
                         for(int i = 0; i<6; ++i){
-                            indices.push_back(faceIndices[5][i] + base_index);
+                            indices.push_back(faceIndices[i] + base_index);
                         }
                     }
-                   if(front){ //back
-                       float face[] = {
-                           0.5f + a, -0.5f + b, -0.5f + c, 0.5f, (N-1) * 0.0625f,
-                          -0.5f + a, -0.5f + b, -0.5f + c, 0.75f, (N-1) * 0.0625f,
-                          -0.5f + a,  0.5f + b, -0.5f + c, 0.75f, (N) * 0.0625f,
-                           0.5f + a,  0.5f + b, -0.5f + c, 0.5f, (N) * 0.0625f };
-                       for(int i = 0; i<20; i+=5){
-                           vertices.push_back(face[i+0]);
-                           vertices.push_back(face[i+1]);
-                           vertices.push_back(face[i+2]);
-                           vertices.push_back(face[i+3]);
-                           vertices.push_back(face[i+4]);
+                   if(front){
+
+
+                       face[0] = pack_data(x,y,z,3,N,0,0);
+                       face[1] = pack_data(x+1,y,z,3,N,1,0);
+                       face[2] = pack_data(x+1,y+1,z,3,N,1,1);
+                       face[3] = pack_data(x,y+1,z,3,N,0,1);
+
+                       int base_index = vertices.size();
+                       for(int i = 0; i<4; i++){
+                           vertices.push_back(face[i]);
                        }
-                       int base_index = vertices.size()/ 5 - 4;
                        for(int i = 0; i<6; ++i){
-                           indices.push_back(faceIndices[4][i] + base_index);
+                           indices.push_back(faceIndices[i] + base_index);
                        }
                    }
-                   if(top){ //top
-                       float face[] = {
-                       -0.5f + a, 0.5f + b,  0.5f + c, 0.0f, (N-1) * 0.0625f,
-                        0.5f + a, 0.5f + b,  0.5f + c, 0.25f,  (N-1) * 0.0625f,
-                        0.5f + a, 0.5f + b, -0.5f + c, 0.25f,  N * 0.0625f,
-                       -0.5f + a, 0.5f + b, -0.5f + c, 0.0f, N * 0.0625f };
-                       for(int i = 0; i<20; i+=5){
-                           vertices.push_back(face[i+0]);
-                           vertices.push_back(face[i+1]);
-                           vertices.push_back(face[i+2]);
-                           vertices.push_back(face[i+3]);
-                           vertices.push_back(face[i+4]);
+                   if(top){
+
+
+                       face[0] = pack_data(x,y+1,z,4,N,0,0);
+                       face[1] = pack_data(x+1,y+1,z,4,N,1,0);
+                       face[2] = pack_data(x+1,y+1,z+1,4,N,1,1);
+                       face[3] = pack_data(x,y+1,z+1,4,N,0,1);
+
+                       int base_index = vertices.size();
+                       for(int i = 0; i<4; i++){
+                           vertices.push_back(face[i]);
                        }
-                       int base_index = vertices.size()/ 5 - 4;
                        for(int i = 0; i<6; ++i){
-                           indices.push_back(faceIndices[3][i] + base_index);
+                           indices.push_back(faceIndices[i] + base_index);
                        }
                    }
-                   if(bottom){  //bottom
-                       float face[] = {
-                           0.5f + a, -0.5f + b,  0.5f + c, 0.25f, (N-1) * 0.0625f,
-                          -0.5f + a, -0.5f + b,  0.5f + c, 0.5f,  (N-1) * 0.0625f,
-                          -0.5f + a, -0.5f + b, -0.5f + c, 0.5f,  N * 0.0625f,
-                           0.5f + a, -0.5f + b, -0.5f + c, 0.25f, N * 0.0625f };
-                       for(int i = 0; i<20; i+=5){
-                           vertices.push_back(face[i+0]);
-                           vertices.push_back(face[i+1]);
-                           vertices.push_back(face[i+2]);
-                           vertices.push_back(face[i+3]);
-                           vertices.push_back(face[i+4]);
+                   if(bottom){
+
+
+                       face[0] = pack_data(x+1,y,z,5,N,0,0);
+                       face[1] = pack_data(x,y,z,5,N,1,0);
+                       face[2] = pack_data(x,y,z+1,5,N,1,1);
+                       face[3] = pack_data(x+1,y,z+1,5,N,0,1);
+
+                       int base_index = vertices.size();
+                       for(int i = 0; i<4; i++){
+                           vertices.push_back(face[i]);
                        }
-                       int base_index = vertices.size()/ 5 - 4;
                        for(int i = 0; i<6; ++i){
-                           indices.push_back(faceIndices[2][i] + base_index);
+                           indices.push_back(faceIndices[i] + base_index);
                        }
                    }
                 }
@@ -232,7 +219,7 @@ void Chunk::gen_mesh(int c_size) {
 
     // Update VBO and EBO
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(int), vertices.data(), GL_STATIC_DRAW);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(int), indices.data(), GL_STATIC_DRAW);

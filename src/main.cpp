@@ -38,7 +38,7 @@ float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
 //camera
-Camera camera(glm::vec3(0.0f, 256.0f, 0.0f), glm::vec3(0.0f,1.0f,0.0f), -90.0f, 10.0f);
+Camera camera(glm::vec3(33.0f, 255.0f, 33.0f), glm::vec3(0.0f,1.0f,0.0f), -90.0f, 10.0f);
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT/ 2.0f;
 bool firstMouse = true;
@@ -49,7 +49,7 @@ int main(){
     auto window = init_glfw();
 
     Shader shader_program("../../src/libs/vs.txt","../../src/libs/fs.txt");
-    const char*  texture_path1 = "../../src/res/block.png";
+    const char*  texture_path1 = "../../src/res/awesomeface.png";
     const char* texture_path2 = "../../src/res/atlas1.png";
     //const char* texture_path3 = "../../src/res/up.png";
     unsigned int texture1, texture2;
@@ -63,7 +63,9 @@ int main(){
    Terrain terrain = Terrain(8,123,32);
    terrain.init_world_chunks();
 
-    while(!glfwWindowShouldClose(window)){
+
+
+   while(!glfwWindowShouldClose(window)){
         //event/input handeling
         float currentFrame = static_cast<float>(glfwGetTime());
         deltaTime = currentFrame - lastFrame;
@@ -98,12 +100,11 @@ int main(){
         unsigned int view_loc = glGetUniformLocation(shader_program.ID, "view");
         glUniformMatrix4fv(view_loc, 1, GL_FALSE, &view[0][0]);
 
-        terrain.draw_terrain();
+        int chunk_world_pos = glGetUniformLocation(shader_program.ID, "chunk_coords");
 
-       // swaps the buffer swaps the colour buffer(a buffer which contais the
-       // colour val of each rendering pixel) and show it to the screen
+        terrain.draw_terrain(shader_program.ID, chunk_world_pos);
+
        glfwSwapBuffers(window);
-       // checks for envent triggering
        glfwPollEvents();
     }
     //deallocation of buffers
@@ -205,8 +206,8 @@ GLFWwindow* init_glfw(){
         return 0;
     }
     glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
+    //glEnable(GL_CULL_FACE);
+    //glCullFace(GL_BACK);
     //glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
     return window;
 }

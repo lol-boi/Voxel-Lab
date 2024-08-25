@@ -10,19 +10,21 @@
 
 class Chunk {
 private:
-    glm::vec3 chunk_pos_in_world;
     unsigned int vao, vbo, ebo;
     int *chunk_data;
-    std::vector<float> vertices;
+    std::vector<unsigned int> vertices;
     std::vector<int> indices;
     void gen_mesh(int);
+    int pack_data(int,int,int,int,int,int,int);
 
 public:
+
+    glm::vec3 chunk_pos_in_world;
     int get_height(int, int);
     Chunk(glm::vec3);
     //~Chunk();
     void update_mesh();
-    void gen_chunk_data(int, int);
+    void gen_chunk_data(int chunk_size, int seed);
     void draw();
 };
 
