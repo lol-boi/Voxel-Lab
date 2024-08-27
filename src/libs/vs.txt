@@ -1,35 +1,84 @@
 
 #version 330 core
 
-layout (location = 0) in int data;
+layout (location = 0) in vec3 vertex_pos;
+layout (location = 1) in int packed_instance_data;
 
 out vec2 tex_coord;
 
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
+
 uniform vec3 chunk_coords;
 
 void main()
 {
-    float pos_x = data & 63;
+
+    float pos_x = packed_instance_data & 31;
     pos_x += chunk_coords.x * 32;
 
-    float pos_y = (data >> 6) & 63;
+    float pos_y = (packed_instance_data >> 5) & 31;
     pos_y += chunk_coords.y * 32;
 
-    float pos_z = (data >> 12) & 63;
+    float pos_z = (packed_instance_data >> 10) & 31;
     pos_z += chunk_coords.z * 32;
 
-    //int normal = (data >> 18) & 7;
-    //int texture = (data >> 21) & 15;
-    float u = float((data >> 22) & 1);
-    float v = float((data >> 23) & 1);
+    int normal = (packed_instance_data >> 15) & 7;
+    int texture = (packed_instance_data >> 18) & 15;
 
-    vec3 aPos = vec3(pos_x, pos_y, pos_z);
 
-    // Map the texture coordinates
-    tex_coord = vec2(u, v);
+    vec3 face_pos = vec3(pos_x, pos_y, pos_z);
+    vec3 rotated_pos = vertex_pos;
 
-    gl_Position = projection * view * model * vec4(aPos, 1.0);
+    tex_coord = vec2(vertex_pos.x, vertex_pos.y) + vec2(0.5, 0.5);
+    tex_coord.y = ((texture - 1) + tex_coord.y) * .0625;
+    if (normal == 1) { //front this is like this maybe cause the +z and -z normalisation is diferent in opengl as to the
+        rotated_pos = vertex_pos;
+        if(tex_coord.x == 0){
+            tex_coord.x = .5;
+        }
+        else{
+            tex_coord.x = .75;
+        }
+    } else if (normal == 0) { //back
+        rotated_pos = vec3(vertex_pos.x, vertex_pos.y, -vertex_pos.z);
+        if(tex_coord.x == 0){
+            tex_coord.x = .5;
+        }
+        else{
+            tex_coord.x = .75;
+        }
+    } else if (normal == 2) { //right
+        rotated_pos = vec3(vertex_pos.z, vertex_pos.y, -vertex_pos.x);
+        if(tex_coord.x == 0){
+            tex_coord.x = .75;
+        }
+        else{
+            tex_coord.x = 1;
+        }
+    } else if (normal == 3) { //left
+        rotated_pos = vec3(-vertex_pos.z, vertex_pos.y, vertex_pos.x);
+        if(tex_coord.x == 0){
+            tex_coord.x = .75;
+        }
+        else{
+            tex_coord.x = 1;
+        }
+    } else if (normal == 4) { //top
+        rotated_pos = vec3(vertex_pos.x, vertex_pos.z, vertex_pos.y);
+        tex_coord.x *= .25;
+    } else if (normal == 5) { //bottom
+        rotated_pos = vec3(vertex_pos.x, -vertex_pos.z, -vertex_pos.y);
+        if(tex_coord.x == 0){
+            tex_coord.x = .25;
+        }
+        else{
+            tex_coord.x = .5;
+        }
+    }
+
+    vec3 final_pos = face_pos + rotated_pos;
+
+    gl_Position = projection * view * model * vec4(final_pos, 1.0);
 }

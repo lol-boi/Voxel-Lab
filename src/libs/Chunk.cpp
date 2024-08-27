@@ -5,25 +5,32 @@
 #include <glm/ext/vector_float3.hpp>
 #include <vector>
 
-
-const int faceIndices[6] = {
-     0, 1, 2, 2, 3, 0
-};
-
 Chunk::Chunk(glm::vec3 pos) {
     chunk_pos_in_world = pos;
     glGenBuffers(1, &vbo);
     glGenVertexArrays(1, &vao);
-    glGenBuffers(1, &ebo);
+    glGenBuffers(1, &ibo);
+
     glBindVertexArray(vao);
 
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glVertexAttribIPointer(0, 1, GL_INT, sizeof(int), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT,GL_FALSE,sizeof(float)*3, (void*)0);
     glEnableVertexAttribArray(0);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+    glBindBuffer(GL_ARRAY_BUFFER, ibo);
+    glVertexAttribIPointer(1,1,GL_UNSIGNED_INT,sizeof(GLuint),(void*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribDivisor(1,1);
+
 
     glBindVertexArray(0);
+
+    vertices = {
+        -0.5f, -0.5f, 0.5f,
+         0.5f, -0.5f, 0.5f,
+        -0.5f,  0.5f, 0.5f,
+         0.5f,  0.5f, 0.5f
+    };
 }
 
 void Chunk::gen_chunk_data(int c_size, int seed){
@@ -79,22 +86,17 @@ void Chunk::gen_chunk_data(int c_size, int seed){
     gen_mesh(c_size);
 }
 
-int Chunk:: pack_data(int x, int y, int z, int normal, int texture,int u, int v) {
+int Chunk::pack_data(int x, int y, int z, int normal, int texture) {
     int data = 0;
-    data |= (x & 63);
-    data |= (y & 63) << 6;
-    data |= (z & 63) << 12;
-    data |= (normal & 7) << 18;
-    data |= (texture & 15) << 21;
-    data |= (u & 1) << 22;
-    data |= (v & 1) << 23;
+    data |= (x & 31);               // 5 bits for x (0-31)
+    data |= (y & 31) << 5;          // 5 bits for y (0-31)
+    data |= (z & 31) << 10;         // 5 bits for z (0-31)
+    data |= (normal & 7) << 15;     // 3 bits for normal (0-7)
+    data |= (texture & 15) << 18;   // 4 bits for texture index (0-15)
     return data;
 }
 
 void Chunk::gen_mesh(int c_size) {
-    // Clear previous data
-    vertices.clear();
-    indices.clear();
 
    for(int z = 0; z<c_size; z++){
        for(int y = 0; y<c_size; y++){
@@ -110,124 +112,46 @@ void Chunk::gen_mesh(int c_size) {
                    bool top = (y < c_size-1 ) ? !chunk_data[index + (c_size * c_size)] : true;
                    bool bottom = (y > 0) ? !chunk_data[index - (c_size * c_size)] : true;
 
-                   int face[4];
 
-                   if(left){
-
-                        face[0] = pack_data(x,y,z+1,0,N,0,0);
-                        face[1] = pack_data(x,y,z,0,N,1,0);
-                        face[2] = pack_data(x,y+1,z,0,N,1,1);
-                        face[3] = pack_data(x,y+1,z+1,0,N,0,1);
-
-                        int base_index = vertices.size();
-                        for(int i = 0; i<4; i++){
-                            vertices.push_back(face[i]);
-                        }
-                        for(int i = 0; i<6; ++i){
-                           indices.push_back(faceIndices[i] + base_index);
-                        }
+                   if(front){ //0
+                        unsigned int face= pack_data(x,y,z,0,N);
+                       instance_data.push_back(face);
                    }
-                   if(right){
-
-
-
-                       face[0] = pack_data(x+1,y,z+0,1,N,0,0);
-                       face[1] = pack_data(x+1,y,z+1,1,N,1,0);
-                       face[2] = pack_data(x+1,y+1,z+1,1,N,1,1);
-                       face[3] = pack_data(x+1,y+1,z,1,N,0,1);
-
-                       int base_index = vertices.size();
-
-                       for(int i = 0; i<4; i++){
-                           vertices.push_back(face[i]);
-                       }
-                       for(int i = 0; i<6; ++i){
-                           indices.push_back(faceIndices[i] + base_index);
-                       }
+                   if(back){ //1
+                        unsigned int face= pack_data(x,y,z,1,N);
+                       instance_data.push_back(face);
                    }
-
-
-                   if(back){
-
-
-
-                       face[0] = pack_data(x+1,y,z+1,2,N,0,0);
-                       face[1] = pack_data(x,y,z+1,2,N,1,0);
-                       face[2] = pack_data(x,y+1,z+1,2,N,1,1);
-                       face[3] = pack_data(x+1,y+1,z+1,2,N,0,1);
-
-                       int base_index = vertices.size();
-                       for(int i = 0; i<4; i++){
-                            vertices.push_back(face[i]);
-                        }
-                        for(int i = 0; i<6; ++i){
-                            indices.push_back(faceIndices[i] + base_index);
-                        }
+                    if(right){ //2
+                        unsigned int face= pack_data(x,y,z,2,N);
+                        instance_data.push_back(face);
                     }
-                   if(front){
-
-
-                       face[0] = pack_data(x,y,z,3,N,0,0);
-                       face[1] = pack_data(x+1,y,z,3,N,1,0);
-                       face[2] = pack_data(x+1,y+1,z,3,N,1,1);
-                       face[3] = pack_data(x,y+1,z,3,N,0,1);
-
-                       int base_index = vertices.size();
-                       for(int i = 0; i<4; i++){
-                           vertices.push_back(face[i]);
-                       }
-                       for(int i = 0; i<6; ++i){
-                           indices.push_back(faceIndices[i] + base_index);
-                       }
+                    if(left){ //3
+                        unsigned int face= pack_data(x,y,z,3,N);
+                        instance_data.push_back(face);
                    }
-                   if(top){
-
-
-                       face[0] = pack_data(x,y+1,z,4,N,0,0);
-                       face[1] = pack_data(x+1,y+1,z,4,N,1,0);
-                       face[2] = pack_data(x+1,y+1,z+1,4,N,1,1);
-                       face[3] = pack_data(x,y+1,z+1,4,N,0,1);
-
-                       int base_index = vertices.size();
-                       for(int i = 0; i<4; i++){
-                           vertices.push_back(face[i]);
-                       }
-                       for(int i = 0; i<6; ++i){
-                           indices.push_back(faceIndices[i] + base_index);
-                       }
+                   if(top){ //4
+                       unsigned int face = pack_data(x,y,z,4,N);
+                        instance_data.push_back(face);
                    }
-                   if(bottom){
-
-
-                       face[0] = pack_data(x+1,y,z,5,N,0,0);
-                       face[1] = pack_data(x,y,z,5,N,1,0);
-                       face[2] = pack_data(x,y,z+1,5,N,1,1);
-                       face[3] = pack_data(x+1,y,z+1,5,N,0,1);
-
-                       int base_index = vertices.size();
-                       for(int i = 0; i<4; i++){
-                           vertices.push_back(face[i]);
-                       }
-                       for(int i = 0; i<6; ++i){
-                           indices.push_back(faceIndices[i] + base_index);
-                       }
+                   if(bottom){ //5
+                       unsigned int face = pack_data(x,y,z,5,N);
+                        instance_data.push_back(face);
                    }
                 }
            }
        }
    }
 
-    // Update VBO and EBO
+    // Update VBO and IBO
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(int), vertices.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(int), indices.data(), GL_STATIC_DRAW);
-
+    glBindBuffer(GL_ARRAY_BUFFER,ibo);
+    glBufferData(GL_ARRAY_BUFFER,instance_data.size() * sizeof(int), instance_data.data(),GL_STATIC_DRAW);
     glBindVertexArray(0);
 }
 
 void Chunk::draw() {
     glBindVertexArray(this->vao);
-    glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+    glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, instance_data.size());
 }
