@@ -14,7 +14,7 @@ uniform vec3 chunk_coords;
 
 void main()
 {
-
+    //unpacking the data
     float pos_x = packed_instance_data & 31;
     pos_x += chunk_coords.x * 32;
 
@@ -31,8 +31,12 @@ void main()
     vec3 face_pos = vec3(pos_x, pos_y, pos_z);
     vec3 rotated_pos = vertex_pos;
 
+
     tex_coord = vec2(vertex_pos.x, vertex_pos.y) + vec2(0.5, 0.5);
-    tex_coord.y = ((texture - 1) + tex_coord.y) * .0625;
+    tex_coord.y = ((texture - 1) + tex_coord.y) * .0625; //calculating v coordinates
+
+
+    //roating the base face model/mesh and also calcluateing v coordinates
     if (normal == 1) { //front this is like this maybe cause the +z and -z normalisation is diferent in opengl as to the
         rotated_pos = vertex_pos;
         if(tex_coord.x == 0){
@@ -41,6 +45,7 @@ void main()
         else{
             tex_coord.x = .75;
         }
+
     } else if (normal == 0) { //back
         rotated_pos = vec3(vertex_pos.x, vertex_pos.y, -vertex_pos.z);
         if(tex_coord.x == 0){
