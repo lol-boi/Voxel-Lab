@@ -10,7 +10,7 @@ uniform sampler2D texture2;
 void main()
 {
     // Sample the texture using tex_coord
-    vec4 tex_color = texture(texture1, tex_coord);
+    vec4 tex_color = texture(texture2, tex_coord);
 
     // Output the color
     color = tex_color;

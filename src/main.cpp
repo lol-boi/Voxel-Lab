@@ -1,7 +1,5 @@
 #include "libs/glad/include/glad/glad.h"
-
 #include "libs/Terrain.hpp"
-
 #include <GL/gl.h>
 #include <GL/glext.h>
 #include "libs/glfw/include/GLFW/glfw3.h"
@@ -38,7 +36,7 @@ float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
 //camera
-Camera camera(glm::vec3(33.0f, 255.0f, 33.0f), glm::vec3(0.0f,1.0f,0.0f), -90.0f, 10.0f);
+Camera camera(glm::vec3(38.0f, 255.0f, 38.0f), glm::vec3(0.0f,1.0f,0.0f), -90.0f, 10.0f);
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT/ 2.0f;
 bool firstMouse = true;
@@ -62,7 +60,6 @@ int main(){
 
    Terrain terrain = Terrain(8,123,32);
    terrain.init_world_chunks();
-
 
 
    while(!glfwWindowShouldClose(window)){
@@ -101,7 +98,6 @@ int main(){
         glUniformMatrix4fv(view_loc, 1, GL_FALSE, &view[0][0]);
 
         int chunk_world_pos = glGetUniformLocation(shader_program.ID, "chunk_coords");
-
         terrain.draw_terrain(shader_program.ID, chunk_world_pos);
 
        glfwSwapBuffers(window);

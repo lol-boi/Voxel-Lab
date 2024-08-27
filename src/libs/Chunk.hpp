@@ -10,12 +10,12 @@
 
 class Chunk {
 private:
-    unsigned int vao, vbo, ebo;
+    unsigned int vao, vbo, ibo;
     int *chunk_data;
-    std::vector<unsigned int> vertices;
-    std::vector<int> indices;
+    std::vector<float> vertices;
+    std::vector<int> instance_data;
     void gen_mesh(int);
-    int pack_data(int,int,int,int,int,int,int);
+    int pack_data(int,int,int,int,int);
 
 public:
 
