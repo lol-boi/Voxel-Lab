@@ -1,5 +1,4 @@
 #include "Chunk.hpp"
-#include "glad/include/glad/glad.h"
 #include "FastNoiseLite.h"
 #include <bits/types/clockid_t.h>
 #include <glm/ext/vector_float3.hpp>
@@ -7,30 +6,6 @@
 
 Chunk::Chunk(glm::vec3 pos) {
     chunk_pos_in_world = pos;
-    glGenBuffers(1, &vbo);
-    glGenVertexArrays(1, &vao);
-    glGenBuffers(1, &ibo);
-
-    glBindVertexArray(vao);
-
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glVertexAttribPointer(0, 3, GL_FLOAT,GL_FALSE,sizeof(float)*3, (void*)0);
-    glEnableVertexAttribArray(0);
-
-    glBindBuffer(GL_ARRAY_BUFFER, ibo);
-    glVertexAttribIPointer(1,1,GL_UNSIGNED_INT,sizeof(GLuint),(void*)0);
-    glEnableVertexAttribArray(1);
-    glVertexAttribDivisor(1,1);
-
-
-    glBindVertexArray(0);
-
-    vertices = {
-        -0.5f, -0.5f, 0.5f,
-         0.5f, -0.5f, 0.5f,
-        -0.5f,  0.5f, 0.5f,
-         0.5f,  0.5f, 0.5f
-    };
 }
 
 void Chunk::gen_chunk_data(int c_size, int seed){
@@ -83,7 +58,6 @@ void Chunk::gen_chunk_data(int c_size, int seed){
             }
         }
     }
-    gen_mesh(c_size);
 }
 
 int Chunk::pack_data(int x, int y, int z, int normal, int texture) {
@@ -96,8 +70,7 @@ int Chunk::pack_data(int x, int y, int z, int normal, int texture) {
     return data;
 }
 
-void Chunk::gen_mesh(int c_size) {
-
+void Chunk::gen_mesh(int c_size, std::vector<int>* instance_data) {
    for(int z = 0; z<c_size; z++){
        for(int y = 0; y<c_size; y++){
            for(int x = 0; x<c_size; x++){
@@ -115,43 +88,30 @@ void Chunk::gen_mesh(int c_size) {
 
                    if(front){ //0
                         unsigned int face= pack_data(x,y,z,0,N);
-                       instance_data.push_back(face);
+                       instance_data->push_back(face);
                    }
                    if(back){ //1
                         unsigned int face= pack_data(x,y,z,1,N);
-                       instance_data.push_back(face);
+                       instance_data->push_back(face);
                    }
                     if(right){ //2
                         unsigned int face= pack_data(x,y,z,2,N);
-                        instance_data.push_back(face);
+                        instance_data->push_back(face);
                     }
                     if(left){ //3
                         unsigned int face= pack_data(x,y,z,3,N);
-                        instance_data.push_back(face);
+                        instance_data->push_back(face);
                    }
                    if(top){ //4
                        unsigned int face = pack_data(x,y,z,4,N);
-                        instance_data.push_back(face);
+                        instance_data->push_back(face);
                    }
                    if(bottom){ //5
                        unsigned int face = pack_data(x,y,z,5,N);
-                        instance_data.push_back(face);
+                        instance_data->push_back(face);
                    }
                 }
            }
        }
    }
-
-    // Update VBO and IBO
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ARRAY_BUFFER,ibo);
-    glBufferData(GL_ARRAY_BUFFER,instance_data.size() * sizeof(int), instance_data.data(),GL_STATIC_DRAW);
-    glBindVertexArray(0);
-}
-
-void Chunk::draw() {
-    glBindVertexArray(this->vao);
-    glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, instance_data.size());
 }
