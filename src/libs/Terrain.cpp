@@ -6,7 +6,7 @@
 #include <vector>
 #include "Chunk.hpp"
 #include <cmath>
-
+#include <iostream>
 
 Terrain::Terrain(int no_of_chunks,int seed,  int c_size = 32){
     if(no_of_chunks % 2 != 0){
@@ -68,6 +68,7 @@ void Terrain::init_world_chunks(){
 }
 
 void Terrain::update_terrain(){
+    draw_commands.clear();
     instance_data.clear();
     chunk_positions.clear();
 
@@ -86,6 +87,7 @@ void Terrain::update_terrain(){
         offset_size = instance_data.size();
     }
 
+
     glBufferData(GL_SHADER_STORAGE_BUFFER, chunk_positions.size() * sizeof(glm::vec3), chunk_positions.data(), GL_STATIC_DRAW);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo);
 
@@ -98,5 +100,5 @@ void Terrain::update_terrain(){
 
 void Terrain::draw_terrain(){
     glBindVertexArray(vao);
-    glMultiDrawArraysIndirect(GL_TRIANGLE_STRIP, nullptr, draw_commands.size(), 0);
+    glMultiDrawArraysIndirect(GL_TRIANGLE_STRIP, nullptr, draw_commands.size(),0);
 }

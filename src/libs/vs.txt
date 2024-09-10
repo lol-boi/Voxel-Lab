@@ -13,19 +13,19 @@ uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 
-uniform vec3 chunk_coords;
 
 void main()
 {
+    vec3 chunk_coords = chunk_positions[gl_DrawID];
     //unpacking the data
     float pos_x = packed_instance_data & 31;
-    pos_x += chunk_positions[gl_DrawID].x * 32;
+    pos_x += chunk_coords.x * 32;
 
     float pos_y = (packed_instance_data >> 5) & 31;
-    pos_y += chunk_positions[gl_DrawID].y * 32;
+    pos_y += chunk_coords.y * 32;
 
     float pos_z = (packed_instance_data >> 10) & 31;
-    pos_z += chunk_positions[gl_DrawID].z * 32;
+    pos_z += chunk_coords.z * 32;
 
     int normal = (packed_instance_data >> 15) & 7;
     int texture = (packed_instance_data >> 18) & 15;
