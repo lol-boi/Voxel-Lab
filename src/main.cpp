@@ -36,7 +36,7 @@ float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
 //camera
-Camera camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,1.0f,0.0f), -90.0f, 10.0f);
+Camera camera(glm::vec3(19.0f, 255.0f, 88.0f), glm::vec3(0.0f,1.0f,0.0f), -90.0f, 10.0f);
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT/ 2.0f;
 bool firstMouse = true;
@@ -58,9 +58,10 @@ int main(){
     shader_program.set_int("texture1", 0);
     shader_program.set_int("texture2", 1);
 
-   Terrain terrain = Terrain(10,123,32);
+   Terrain terrain = Terrain(2,123,32);
    terrain.init_world_chunks();
 
+   terrain.update_terrain();
 
    while(!glfwWindowShouldClose(window)){
         //event/input handeling
