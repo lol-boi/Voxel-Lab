@@ -4,7 +4,7 @@
 layout (location = 0) in vec3 vertex_pos;
 layout (location = 1) in int packed_instance_data;
 layout(std430, binding = 0) buffer ChunkPositions {
-    vec3 chunk_positions[];
+    vec4 chunk_positions[];
 };
 
 out vec2 tex_coord;
@@ -16,7 +16,9 @@ uniform mat4 projection;
 
 void main()
 {
-    vec3 chunk_coords = chunk_positions[gl_DrawID];
+    vec3 chunk_coords = chunk_positions[gl_DrawID].xyz;
+
+
     //unpacking the data
     float pos_x = packed_instance_data & 31;
     pos_x += chunk_coords.x * 32;

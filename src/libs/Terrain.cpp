@@ -3,6 +3,7 @@
 #include "glad/include/glad/glad.h"
 #include <cstdlib>
 #include <cwchar>
+#include <glm/ext/vector_float4.hpp>
 #include <vector>
 #include "Chunk.hpp"
 #include <cmath>
@@ -75,7 +76,8 @@ void Terrain::update_terrain(){
     int offset_size = 0;
 
     for(Chunk &chunk: world_chunks){
-        chunk_positions.push_back(chunk.chunk_pos_in_world);
+        glm::vec4 tmp_chunk_pos = glm::vec4(chunk.chunk_pos_in_world.x,chunk.chunk_pos_in_world.y,chunk.chunk_pos_in_world.z,0);
+        chunk_positions.push_back(tmp_chunk_pos);
         chunk.gen_mesh(chunk_size, &instance_data);
 
         DrawArraysIndirectCommand cmd;
@@ -86,9 +88,7 @@ void Terrain::update_terrain(){
         draw_commands.push_back(cmd);
         offset_size = instance_data.size();
     }
-
-
-    glBufferData(GL_SHADER_STORAGE_BUFFER, chunk_positions.size() * sizeof(glm::vec3), chunk_positions.data(), GL_STATIC_DRAW);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, chunk_positions.size() * sizeof(glm::vec4), chunk_positions.data(), GL_STATIC_DRAW);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo);
 
     glBufferData(GL_DRAW_INDIRECT_BUFFER, draw_commands.size() * sizeof(DrawArraysIndirectCommand),draw_commands.data(), GL_STATIC_DRAW);

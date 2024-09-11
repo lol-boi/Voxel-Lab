@@ -58,6 +58,8 @@ void Chunk::gen_chunk_data(int c_size, int seed){
             }
         }
     }
+
+
 }
 
 int Chunk::pack_data(int x, int y, int z, int normal, int texture) {
