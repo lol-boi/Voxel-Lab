@@ -3,7 +3,8 @@
 #include <cmath>
 #include "Chunk.hpp"
 #include "glad/include/glad/glad.h"
-#include <glm/ext/vector_float3.hpp>
+#include <glm/ext/vector_float4.hpp>
+#include <glm/ext/vector_int4.hpp>
 #include <vector>
 
 
@@ -24,7 +25,7 @@ class Terrain{
     unsigned int indirect_buffer;
     unsigned int ssbo;
     std::vector<DrawArraysIndirectCommand> draw_commands;
-    std::vector<glm::vec3> chunk_positions;
+    std::vector<glm::vec4> chunk_positions;
 
     public:
 
