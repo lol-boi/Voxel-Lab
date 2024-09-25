@@ -3,6 +3,7 @@
 #include <bits/types/clockid_t.h>
 #include <glm/ext/vector_float3.hpp>
 #include <vector>
+#include <iostream>
 
 Chunk::Chunk(glm::vec3 pos) {
     chunk_pos_in_world = pos;
