@@ -36,7 +36,7 @@ float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
 //camera
-Camera camera(glm::vec3(19.0f, 255.0f, 88.0f), glm::vec3(0.0f,1.0f,0.0f), -90.0f, 10.0f);
+Camera camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,1.0f,0.0f), -90.0f, 10.0f);
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT/ 2.0f;
 bool firstMouse = true;
@@ -58,9 +58,9 @@ int main(){
     shader_program.set_int("texture1", 0);
     shader_program.set_int("texture2", 1);
 
-   Terrain terrain = Terrain(16,123,32);
-   terrain.init_world_chunks();
-
+   Terrain terrain = Terrain(8,123,32);
+   camera.Position = glm::vec3(128,255,128);
+   terrain.init_world_chunks(camera.Position);
    terrain.update_terrain();
 
    while(!glfwWindowShouldClose(window)){
@@ -70,6 +70,9 @@ int main(){
         lastFrame = currentFrame;
 
         process_input(window,false);
+
+        terrain.init_world_chunks(camera.Position);
+        terrain.update_terrain();// Call your tick function
 
         //rendering__________________________________
 
@@ -94,9 +97,10 @@ int main(){
 
 
         glm::mat4 view = camera.GetViewMatrix();
-        view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+        view = glm::translate(view, glm::vec3(0.0f, 0.0f, 0.0f));
         unsigned int view_loc = glGetUniformLocation(shader_program.ID, "view");
         glUniformMatrix4fv(view_loc, 1, GL_FALSE, &view[0][0]);
+        //std::cout << "Camera Postion:" << "[" << camera.Position.x << "," <<  camera.Position.y << "," <<  camera.Position.z  << "]"<< std::endl;
 
         terrain.draw_terrain();
 
