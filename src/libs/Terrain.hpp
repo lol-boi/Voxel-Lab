@@ -6,45 +6,53 @@
 #include <glm/detail/qualifier.hpp>
 #include <glm/ext/vector_float2.hpp>
 #include <glm/ext/vector_float4.hpp>
+#include <glm/ext/vector_int2.hpp>
 #include <glm/ext/vector_int4.hpp>
+#include <mutex>
 #include <vector>
-#include <unordered_map>
 
 
 struct DrawArraysIndirectCommand {
     GLuint count;         // Number of vertices to draw
     GLuint instanceCount; // Number of instances to draw
     GLuint first;         // Starting index in the vertex array
-    GLuint baseInstance;  // Starting index in the instance array
+    GLuint baseInstance;
+    bool operator==(const DrawArraysIndirectCommand& other) const {
+        return count == other.count &&
+               instanceCount == other.instanceCount &&
+               first == other.first &&
+               baseInstance == other.baseInstance;
+    } // Starting index in the instance array
 };
 
-struct vec3Hash{
-    std::size_t operator()(const::glm::vec3 &v)const{
-        return std::hash<float>()(v.x) ^ std::hash<float>()(v.y) ^ std::hash<float>()(v.z);
-    }
-};
 
 class Terrain{
     std::vector<float> vertices;
     unsigned int vbo, vao, ibo;
-    int chunk_size;  //default val is 32
-    int world_size_in_chunks;
-    int world_seed;
-    int world_size;
     unsigned int indirect_buffer;
     unsigned int ssbo;
+
+    int chunk_size;
+    int world_seed;
+    int world_size;
+    int render_distance;
+    glm::ivec2 prev_chunk_pos;
+    std::mutex buffer_mutex;
+
     std::vector<DrawArraysIndirectCommand> draw_commands;
     std::vector<glm::vec4> chunk_positions;
-    glm::vec2 prev_pos;
+    std::vector<Chunk> chunks_data;
 
     public:
-
+    bool is_buffer_updated;
     std::vector<int> instance_data;
     Terrain(int no_of_chunks,int seed, int c_size);
-    std::unordered_map<glm::vec3,Chunk, vec3Hash> chunkmap;
-    void init_world_chunks(glm::vec3);
+
+    bool init_world_chunks(glm::vec3);
+    void update_buffer_data();
+    void update_chunk();
     void draw_terrain();
-    void update_terrain();
+    void upload_buffers();
 };
 
 #endif

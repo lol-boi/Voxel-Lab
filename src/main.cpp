@@ -17,7 +17,11 @@
 #include "libs/camera.h"
 #include "libs/shader.hpp"
 #include <glm/trigonometric.hpp>
+#include <thread>
+#include <chrono>
 #include <iostream>
+#include <functional>
+#include <utility>
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void process_input(GLFWwindow* window, float input_debug);
@@ -25,6 +29,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 unsigned int compile_shader(unsigned int, const std::string&);
 static unsigned int create_shader(const std::string&, const std::string&);
+void thread_function(Terrain &);
 GLFWwindow* init_glfw();
 unsigned int set_texture(const char * path, float rgba);
 void set_polygon_mode();
@@ -32,8 +37,12 @@ void set_polygon_mode();
 const unsigned int SCR_WIDTH = 1500;
 const unsigned int SCR_HEIGHT = 900;
 
+const float FPS_CAP = 60.0f;
+const float FRAME_DURATION = 1.0f / FPS_CAP;
+
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
+
 
 //camera
 Camera camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,1.0f,0.0f), -90.0f, 10.0f);
@@ -59,9 +68,11 @@ int main(){
     shader_program.set_int("texture2", 1);
 
    Terrain terrain = Terrain(8,123,32);
-   camera.Position = glm::vec3(128,255,128);
+   camera.Position = glm::vec3(32*10,255,32*10);
    terrain.init_world_chunks(camera.Position);
-   terrain.update_terrain();
+   terrain.upload_buffers();
+   std::thread tick(thread_function,std::ref(terrain));
+   tick.detach();
 
    while(!glfwWindowShouldClose(window)){
         //event/input handeling
@@ -71,8 +82,7 @@ int main(){
 
         process_input(window,false);
 
-        terrain.init_world_chunks(camera.Position);
-        terrain.update_terrain();// Call your tick function
+        //terrain.init_world_chunks(camera.Position);
 
         //rendering__________________________________
 
@@ -100,12 +110,19 @@ int main(){
         view = glm::translate(view, glm::vec3(0.0f, 0.0f, 0.0f));
         unsigned int view_loc = glGetUniformLocation(shader_program.ID, "view");
         glUniformMatrix4fv(view_loc, 1, GL_FALSE, &view[0][0]);
-        //std::cout << "Camera Postion:" << "[" << camera.Position.x << "," <<  camera.Position.y << "," <<  camera.Position.z  << "]"<< std::endl;
-
+        //std::cout << "Camera Postion_world:" << "[" <<(int) camera.Position.x/32 << "," << (int) camera.Position.y/32 << "," << (int) camera.Position.z/32  << "]"<< std::endl;
+        //std::cout << "Camera Postion_chunk:" << "[" <<(int) camera.Position.x << "," << (int) camera.Position.y << "," << (int) camera.Position.z  << "]"<< std::endl;
+        if(terrain.is_buffer_updated == true){
+            terrain.upload_buffers();
+        }
         terrain.draw_terrain();
 
        glfwSwapBuffers(window);
        glfwPollEvents();
+       float frameTime = static_cast<float>(glfwGetTime()) - currentFrame;
+       if (frameTime < FRAME_DURATION) {
+           std::this_thread::sleep_for(std::chrono::duration<float>(FRAME_DURATION - frameTime));
+       }
     }
     //deallocation of buffers
 
@@ -114,46 +131,50 @@ int main(){
     return 0;
 }
 
-void process_input(GLFWwindow *window, float input_dbug){
-    if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS){
+void process_input(GLFWwindow *window, float input_dbug) {
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, true);
     }
 
-    float cameraSpeed = static_cast<float>(2.5 * deltaTime);
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS){
-        camera.ProcessKeyboard(FORWARD, deltaTime);
-        if(input_dbug)
-            std::cout << "W" << std::endl;
-    }
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS){
-        camera.ProcessKeyboard(BACKWARD, deltaTime);
-        if(input_dbug)
-            std::cout << "S" << std::endl;
-    }
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS){
-        camera.ProcessKeyboard(LEFT, deltaTime);
-        if(input_dbug)
-            std::cout << "A" << std::endl;
-    }
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS){
-        camera.ProcessKeyboard(RIGHT, deltaTime);
-        if(input_dbug)
-            std::cout << "D" << std::endl;
-    }
-    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS){
-        camera.ProcessKeyboard(UP,deltaTime);
-        if(input_dbug)
-            std::cout << "SPACE" << std::endl;
-    }
-    if(glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS ){
-        camera.ProcessKeyboard(DOWN,deltaTime);
-        if(input_dbug)
-            std::cout << "SHIFT" << std::endl;
-    }
-    if(glfwGetKey(window, GLFW_KEY_P) ==  GLFW_PRESS){
+
+        float cameraSpeed = static_cast<float>(2.5 * deltaTime);
+
+        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+            camera.ProcessKeyboard(FORWARD, deltaTime);
+            if (input_dbug)
+                std::cout << "W" << std::endl;
+        }
+        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+            camera.ProcessKeyboard(BACKWARD, deltaTime);
+            if (input_dbug)
+                std::cout << "S" << std::endl;
+        }
+        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+            camera.ProcessKeyboard(LEFT, deltaTime);
+            if (input_dbug)
+                std::cout << "A" << std::endl;
+        }
+        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+            camera.ProcessKeyboard(RIGHT, deltaTime);
+            if (input_dbug)
+                std::cout << "D" << std::endl;
+        }
+        if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
+            camera.ProcessKeyboard(UP, deltaTime);
+            if (input_dbug)
+                std::cout << "SPACE" << std::endl;
+        }
+        if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+            camera.ProcessKeyboard(DOWN, deltaTime);
+            if (input_dbug)
+                std::cout << "SHIFT" << std::endl;
+        }
+
+    if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) {
         set_polygon_mode();
     }
 }
+
 void framebuffer_size_callback(GLFWwindow* window, int width, int height){
        glViewport(0,0,width,height);
 }
@@ -245,5 +266,19 @@ void set_polygon_mode(){
         glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
     }else{
         glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
+    }
+}
+
+void thread_function(Terrain &t) {
+    const std::chrono::milliseconds interval(50); // Time interval (50ms)
+    while (true) {
+        auto start = std::chrono::steady_clock::now();
+        bool state = t.init_world_chunks(camera.Position);
+
+        auto end = std::chrono::steady_clock::now();
+        std::chrono::duration<double> elapsed = end - start;
+        if (elapsed < interval) {
+            std::this_thread::sleep_for(interval - elapsed);
+        }
     }
 }
