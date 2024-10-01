@@ -14,7 +14,6 @@
 Terrain::Terrain(int no_of_chunks,int seed,  int c_size = 32){
     no_of_chunks += 1;
     chunk_size = c_size;
-    world_size = chunk_size * no_of_chunks;
     world_seed = seed;
     render_distance = 3;
     prev_chunk_pos = glm::ivec2(0,0);
@@ -52,7 +51,6 @@ Terrain::Terrain(int no_of_chunks,int seed,  int c_size = 32){
 
     glBindBuffer(GL_DRAW_INDIRECT_BUFFER, indirect_buffer);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
-
 }
 
 
@@ -90,17 +88,16 @@ void Terrain::update_buffer_data(){
 
     for(auto &chunk : chunks_data){
         chunk.gen_mesh(chunk_size, &instance_data);
-
         DrawArraysIndirectCommand cmd;
-        cmd.count = 4;
-        cmd.instanceCount = instance_data.size() - offset_size;
-        cmd.first = 0;
-        cmd.baseInstance = offset_size; // Used to access the correct chunk position
+        {
+            cmd.count = 4;
+            cmd.instanceCount = instance_data.size() - offset_size;
+            cmd.first = 0;
+            cmd.baseInstance = offset_size; // Used to access the correct chunk position
+        }
         draw_commands.push_back(cmd);
         offset_size = instance_data.size();
     }
-
-    std::cout << "Updated the buffers" << std::endl;
     is_buffer_updated = true;
 }
 
@@ -119,4 +116,8 @@ void Terrain:: upload_buffers(){
 void Terrain::draw_terrain(){
     glBindVertexArray(vao);
     glMultiDrawArraysIndirect(GL_TRIANGLE_STRIP, nullptr, draw_commands.size(),0);
+}
+
+int Terrain::chunk_count(){
+    return chunk_positions.size();
 }

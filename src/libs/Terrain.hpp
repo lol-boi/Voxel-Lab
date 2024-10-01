@@ -25,34 +25,35 @@ struct DrawArraysIndirectCommand {
     } // Starting index in the instance array
 };
 
-
 class Terrain{
-    std::vector<float> vertices;
-    unsigned int vbo, vao, ibo;
-    unsigned int indirect_buffer;
-    unsigned int ssbo;
-
-    int chunk_size;
-    int world_seed;
-    int world_size;
-    int render_distance;
-    glm::ivec2 prev_chunk_pos;
-    std::mutex buffer_mutex;
-
-    std::vector<DrawArraysIndirectCommand> draw_commands;
-    std::vector<glm::vec4> chunk_positions;
-    std::vector<Chunk> chunks_data;
-
     public:
-    bool is_buffer_updated;
-    std::vector<int> instance_data;
-    Terrain(int no_of_chunks,int seed, int c_size);
+        Terrain(int no_of_chunks,int seed, int c_size);
 
-    bool init_world_chunks(glm::vec3);
-    void update_buffer_data();
-    void update_chunk();
-    void draw_terrain();
-    void upload_buffers();
+        bool is_buffer_updated;
+        int render_distance;
+        std::vector<int> instance_data;
+
+        bool init_world_chunks(glm::vec3);
+        void update_buffer_data();
+        void update_chunk(); // When we destroy or insert a block
+        void draw_terrain();
+        void upload_buffers();
+        int chunk_count();
+
+    private:
+        std::vector<float> vertices;
+        unsigned int vbo, vao, ibo;
+        unsigned int indirect_buffer;
+        unsigned int ssbo;
+
+        int chunk_size;
+        int world_seed;
+        glm::ivec2 prev_chunk_pos;
+        std::mutex buffer_mutex;
+
+        std::vector<DrawArraysIndirectCommand> draw_commands;
+        std::vector<glm::vec4> chunk_positions;
+        std::vector<Chunk> chunks_data;
 };
 
 #endif

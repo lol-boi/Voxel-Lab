@@ -12,6 +12,11 @@ find_package(OpenGL REQUIRED)
 add_library(glad SHARED libs/glad/src/glad.c)
 target_include_directories(glad PUBLIC libs/glad/include)
 
+#Add Imgui library
+add_library(imgui SHARED libs/imgui/imgui.cpp libs/imgui/imgui_impl_glfw.cpp libs/imgui/imgui_impl_opengl3.cpp libs/imgui/imgui_draw.cpp libs/imgui/imgui_widgets.cpp libs/imgui/imgui_tables.cpp libs/imgui/imgui_demo.cpp)
+target_include_directories(imgui PUBLIC libs/imgui)
+target_link_libraries(imgui PUBLIC OpenGL::GL glfw)
+
 # Add stb_image library
 add_library(image SHARED libs/stb_image.c)
 target_include_directories(image PUBLIC libs)
@@ -36,8 +41,9 @@ add_library(glm INTERFACE)
 set(GLM_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/libs/glm")
 target_include_directories(glm INTERFACE ${GLM_INCLUDE_DIR})
 
+
 # Add the executable
 add_executable(${PROJECT_NAME} main.cpp)
 
 # Link the libraries
-target_link_libraries(${PROJECT_NAME} terrain shader image glad OpenGL::GL glfw glm)
+target_link_libraries(${PROJECT_NAME} terrain shader image glad OpenGL::GL glfw glm imgui )
