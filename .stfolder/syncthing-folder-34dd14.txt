@@ -1,0 +1,5 @@
+# This directory is a Syncthing folder marker.
+# Do not delete.
+
+folderID: hzozs-v7aw2
+created: 2024-09-23T13:20:26+05:30

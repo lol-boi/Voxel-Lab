@@ -21,7 +21,11 @@
 #include <chrono>
 #include <iostream>
 #include <functional>
-#include <utility>
+#include "libs/imgui/imgui.h"
+#include "libs/imgui/imgui_impl_glfw.h"
+#include "libs/imgui/imgui_impl_opengl3.h"
+#include <stdio.h>
+
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void process_input(GLFWwindow* window, float input_debug);
@@ -34,6 +38,7 @@ GLFWwindow* init_glfw();
 unsigned int set_texture(const char * path, float rgba);
 void set_polygon_mode();
 
+
 const unsigned int SCR_WIDTH = 1500;
 const unsigned int SCR_HEIGHT = 900;
 
@@ -43,6 +48,11 @@ const float FRAME_DURATION = 1.0f / FPS_CAP;
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
+bool mouseDetached = false;
+
+bool show_demo_window = true;
+bool show_another_window = false;
+ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
 //camera
 Camera camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,1.0f,0.0f), -90.0f, 10.0f);
@@ -74,6 +84,15 @@ int main(){
    std::thread tick(thread_function,std::ref(terrain));
    tick.detach();
 
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+    ImGui::StyleColorsDark();
+
+   // Setup Platform/Renderer backends
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL3_Init();
    while(!glfwWindowShouldClose(window)){
         //event/input handeling
         float currentFrame = static_cast<float>(glfwGetTime());
@@ -85,6 +104,22 @@ int main(){
         //terrain.init_world_chunks(camera.Position);
 
         //rendering__________________________________
+
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+        {
+            static float f = 0.0f;
+            static int counter = 0;
+
+            ImGui::Begin("Debug Window");                          // Create a window called "Hello, world!" and append into it.
+            glm::vec3 pos = camera.Position;
+            ImGui::Text("Current chunk positon: [%.0f, %.f, %.f]", pos.x/32, pos.y/32, pos.z/32);            // Display some text (you can use a format strings too)
+            ImGui::Text("Current camera positon: [%.1f, %.1f, %.1f]",camera.Position.x, camera.Position.y, camera.Position.z);               // Display some text (you can use a format strings too)
+            ImGui::Text("Current rendered chunks: %d ",terrain.render_distance);
+            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+            ImGui::End();
+        }
 
         glClearColor(0.678f,0.847f,0.902f,0.4f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -117,6 +152,8 @@ int main(){
         }
         terrain.draw_terrain();
 
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
        glfwSwapBuffers(window);
        glfwPollEvents();
        float frameTime = static_cast<float>(glfwGetTime()) - currentFrame;
@@ -126,8 +163,14 @@ int main(){
     }
     //deallocation of buffers
 
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
     //terminate
+
+    glfwDestroyWindow(window);
     glfwTerminate();
+    tick.join();
     return 0;
 }
 
@@ -136,39 +179,55 @@ void process_input(GLFWwindow *window, float input_dbug) {
         glfwSetWindowShouldClose(window, true);
     }
 
+    float cameraSpeed = static_cast<float>(2.5 * deltaTime);
 
-        float cameraSpeed = static_cast<float>(2.5 * deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+        camera.ProcessKeyboard(FORWARD, deltaTime);
+        if (input_dbug)
+            std::cout << "W" << std::endl;
+    }
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+        camera.ProcessKeyboard(BACKWARD, deltaTime);
+        if (input_dbug)
+            std::cout << "S" << std::endl;
+    }
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+        camera.ProcessKeyboard(LEFT, deltaTime);
+        if (input_dbug)
+            std::cout << "A" << std::endl;
+    }
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+        camera.ProcessKeyboard(RIGHT, deltaTime);
+        if (input_dbug)
+            std::cout << "D" << std::endl;
+    }
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
+        camera.ProcessKeyboard(UP, deltaTime);
+        if (input_dbug)
+            std::cout << "SPACE" << std::endl;
+    }
+    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+        camera.ProcessKeyboard(DOWN, deltaTime);
+        if (input_dbug)
+            std::cout << "SHIFT" << std::endl;
+    }
 
-        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-            camera.ProcessKeyboard(FORWARD, deltaTime);
-            if (input_dbug)
-                std::cout << "W" << std::endl;
+    // Toggle mouse attachment/detachment with the M key
+    static bool mKeyWasPressed = false;
+    if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS) {
+        if (!mKeyWasPressed) {  // If 'M' was just pressed
+            mouseDetached = !mouseDetached;  // Toggle the state
+            if (mouseDetached) {
+                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);  // Detach mouse
+            } else {
+                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);  // Capture mouse
+            }
         }
-        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-            camera.ProcessKeyboard(BACKWARD, deltaTime);
-            if (input_dbug)
-                std::cout << "S" << std::endl;
-        }
-        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-            camera.ProcessKeyboard(LEFT, deltaTime);
-            if (input_dbug)
-                std::cout << "A" << std::endl;
-        }
-        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-            camera.ProcessKeyboard(RIGHT, deltaTime);
-            if (input_dbug)
-                std::cout << "D" << std::endl;
-        }
-        if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
-            camera.ProcessKeyboard(UP, deltaTime);
-            if (input_dbug)
-                std::cout << "SPACE" << std::endl;
-        }
-        if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
-            camera.ProcessKeyboard(DOWN, deltaTime);
-            if (input_dbug)
-                std::cout << "SHIFT" << std::endl;
-        }
+        mKeyWasPressed = true;
+    } else {
+        mKeyWasPressed = false;
+    }
+
 
     if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) {
         set_polygon_mode();
