@@ -11,11 +11,10 @@
 #include <cmath>
 #include <iostream>
 
-Terrain::Terrain(int no_of_chunks,int seed,  int c_size = 32){
-    no_of_chunks += 1;
-    chunk_size = c_size;
+Terrain::Terrain(int render_dist,int seed){
+    chunk_size = 32;
     world_seed = seed;
-    render_distance = 3;
+    render_distance = render_dist;
     prev_chunk_pos = glm::ivec2(0,0);
     is_buffer_updated = false;
     vertices = {
@@ -59,21 +58,22 @@ bool Terrain::init_world_chunks(glm::vec3 cam_pos){
     int z_chunk = (int) cam_pos.z / 32;
 
     if(prev_chunk_pos != glm::ivec2(x_chunk,z_chunk)){
-        std::cout << "Player now at [" << x_chunk << "," << z_chunk<< "]" <<std::endl;
         std::lock_guard<std::mutex> lock(buffer_mutex);
         chunk_positions.clear();
         chunks_data.clear();
         for(int x = x_chunk - render_distance; x <= x_chunk + render_distance; x++ ){
             for(int z = z_chunk - render_distance; z <= z_chunk + render_distance; z++){
                 for(int y = 0; y<8; y++){
-                    Chunk chunk = Chunk(glm::vec3(x,y,z));
-                    chunk.gen_chunk_data(chunk_size, world_seed);
+                    Chunk *chunk = new Chunk(glm::vec3(x,y,z));
+                    chunk->gen_chunk_data( world_seed);
                     chunks_data.push_back(chunk);
                     chunk_positions.push_back(glm::vec4(x,y,z,0));
                 }
             }
         }
+
         prev_chunk_pos = glm::vec2(x_chunk,z_chunk);
+
         update_buffer_data();
         return true;
     }
@@ -87,7 +87,7 @@ void Terrain::update_buffer_data(){
     size_t offset_size = 0;
 
     for(auto &chunk : chunks_data){
-        chunk.gen_mesh(chunk_size, &instance_data);
+        chunk->cull_face(&instance_data);
         DrawArraysIndirectCommand cmd;
         {
             cmd.count = 4;
@@ -109,7 +109,6 @@ void Terrain:: upload_buffers(){
     glBufferData(GL_DRAW_INDIRECT_BUFFER, draw_commands.size() * sizeof(DrawArraysIndirectCommand),draw_commands.data(), GL_DYNAMIC_DRAW);
 
     glBufferData(GL_ARRAY_BUFFER,instance_data.size() * sizeof(int), instance_data.data(),GL_DYNAMIC_DRAW);
-    std::cout << "Uploaded the buffers" << std::endl;
     is_buffer_updated = false;
 }
 
