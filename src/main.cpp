@@ -65,7 +65,7 @@ int main(){
 
     auto window = init_glfw();
 
-    Shader shader_program("../../src/libs/vs.txt","../../src/libs/fs.txt");
+    Shader shader_program("../../src/libs/vs.glsl","../../src/libs/fs.glsl");
     const char*  texture_path1 = "../../src/res/awesomeface.png";
     const char* texture_path2 = "../../src/res/atlas1.png";
     //const char* texture_path3 = "../../src/res/up.png";
@@ -77,12 +77,15 @@ int main(){
     shader_program.set_int("texture1", 0);
     shader_program.set_int("texture2", 1);
 
-   Terrain terrain = Terrain(8,123,32);
-   camera.Position = glm::vec3(32*10,255,32*10);
-   terrain.init_world_chunks(camera.Position);
-   terrain.upload_buffers();
-   std::thread tick(thread_function,std::ref(terrain));
-   tick.detach();
+
+    Terrain terrain = Terrain(6,123);
+    camera.Position = glm::vec3(32*10,255,32*10);
+
+    terrain.init_world_chunks(camera.Position);
+    terrain.upload_buffers();
+
+    std::thread tick(thread_function,std::ref(terrain));
+    tick.detach();
 
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
@@ -93,7 +96,7 @@ int main(){
    // Setup Platform/Renderer backends
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init();
-   while(!glfwWindowShouldClose(window)){
+    while(!glfwWindowShouldClose(window)){
         //event/input handeling
         float currentFrame = static_cast<float>(glfwGetTime());
         deltaTime = currentFrame - lastFrame;
@@ -145,8 +148,8 @@ int main(){
         view = glm::translate(view, glm::vec3(0.0f, 0.0f, 0.0f));
         unsigned int view_loc = glGetUniformLocation(shader_program.ID, "view");
         glUniformMatrix4fv(view_loc, 1, GL_FALSE, &view[0][0]);
-        //std::cout << "Camera Postion_world:" << "[" <<(int) camera.Position.x/32 << "," << (int) camera.Position.y/32 << "," << (int) camera.Position.z/32  << "]"<< std::endl;
-        //std::cout << "Camera Postion_chunk:" << "[" <<(int) camera.Position.x << "," << (int) camera.Position.y << "," << (int) camera.Position.z  << "]"<< std::endl;
+
+
         if(terrain.is_buffer_updated == true){
             terrain.upload_buffers();
         }
@@ -154,12 +157,12 @@ int main(){
 
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-       glfwSwapBuffers(window);
-       glfwPollEvents();
-       float frameTime = static_cast<float>(glfwGetTime()) - currentFrame;
-       if (frameTime < FRAME_DURATION) {
-           std::this_thread::sleep_for(std::chrono::duration<float>(FRAME_DURATION - frameTime));
-       }
+        glfwSwapBuffers(window);
+        glfwPollEvents();
+        float frameTime = static_cast<float>(glfwGetTime()) - currentFrame;
+        if (frameTime < FRAME_DURATION) {
+            std::this_thread::sleep_for(std::chrono::duration<float>(FRAME_DURATION - frameTime));
+        }
     }
     //deallocation of buffers
 

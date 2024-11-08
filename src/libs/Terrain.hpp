@@ -27,7 +27,7 @@ struct DrawArraysIndirectCommand {
 
 class Terrain{
     public:
-        Terrain(int no_of_chunks,int seed, int c_size);
+        Terrain(int no_of_chunks,int seed);
 
         bool is_buffer_updated;
         int render_distance;
@@ -53,7 +53,7 @@ class Terrain{
 
         std::vector<DrawArraysIndirectCommand> draw_commands;
         std::vector<glm::vec4> chunk_positions;
-        std::vector<Chunk> chunks_data;
+        std::vector<Chunk*> chunks_data;
 };
 
 #endif
