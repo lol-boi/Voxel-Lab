@@ -19,6 +19,7 @@ public:
     void update_mesh();
     void gen_chunk_data(int seed);
     void cull_face(std::vector<int> *);
+    bool chunk_data_present;
 private:
     int *chunk_data;
     int pack_data(int,int,int,int,int);
