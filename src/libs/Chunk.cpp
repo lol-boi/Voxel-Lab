@@ -11,6 +11,7 @@
 
 Chunk::Chunk(glm::vec3 pos) : chunk_data(nullptr) {
     chunk_pos_in_world = pos;
+    chunk_data_present = false;
 }
 
 void Chunk::gen_chunk_data(int seed){
@@ -62,6 +63,7 @@ void Chunk::gen_chunk_data(int seed){
             }
         }
     }
+    chunk_data_present = true;
 }
 
 Chunk::~Chunk(){

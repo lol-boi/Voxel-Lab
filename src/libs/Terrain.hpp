@@ -3,15 +3,21 @@
 #include <cmath>
 #include "Chunk.hpp"
 #include "glad/include/glad/glad.h"
-#include <glm/detail/qualifier.hpp>
-#include <glm/ext/vector_float2.hpp>
-#include <glm/ext/vector_float4.hpp>
-#include <glm/ext/vector_int2.hpp>
-#include <glm/ext/vector_int4.hpp>
+#include <glm/glm.hpp>
 #include <mutex>
+#include <unordered_map>
 #include <vector>
 
-
+struct ivec3_hash {
+    std::size_t operator()(const glm::ivec3& v) const noexcept {
+        std::hash<int> hasher;
+        std::size_t seed = 0;
+        seed ^= hasher(v.x) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+        seed ^= hasher(v.y) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+        seed ^= hasher(v.z) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+        return seed;
+    }
+};
 struct DrawArraysIndirectCommand {
     GLuint count;         // Number of vertices to draw
     GLuint instanceCount; // Number of instances to draw
@@ -53,7 +59,7 @@ class Terrain{
 
         std::vector<DrawArraysIndirectCommand> draw_commands;
         std::vector<glm::vec4> chunk_positions;
-        std::vector<Chunk*> chunks_data;
+        std::unordered_map<glm::ivec3, Chunk*,ivec3_hash> chunks_data;
 };
 
 #endif
