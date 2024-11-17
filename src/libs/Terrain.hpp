@@ -51,6 +51,7 @@ class Terrain{
         unsigned int vbo, vao, ibo;
         unsigned int indirect_buffer;
         unsigned int ssbo;
+        int * instance_buffer_ptr;
 
         int chunk_size;
         int world_seed;
