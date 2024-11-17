@@ -24,6 +24,10 @@ Terrain::Terrain(int render_dist,int seed){
          0.5f,  0.5f, 0.5f
     };
 
+
+    size_t max_chunks = (render_distance * 2 + 1) * (render_distance * 2 + 1) * 8; // x * z * y levels
+    size_t max_instances = max_chunks * 6 * 32 * 32; // worst case: all faces visible
+
     glGenBuffers(1,&indirect_buffer);
     glBindBuffer(GL_DRAW_INDIRECT_BUFFER, indirect_buffer);
 
@@ -42,6 +46,12 @@ Terrain::Terrain(int render_dist,int seed){
     glEnableVertexAttribArray(0);
 
     glBindBuffer(GL_ARRAY_BUFFER, ibo);
+    glBufferStorage(GL_ARRAY_BUFFER, max_instances * sizeof(int), nullptr, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
+    instance_buffer_ptr = (int*)glMapBufferRange(GL_ARRAY_BUFFER, 0, max_instances * sizeof(GLuint), GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
+    if (!instance_buffer_ptr) {
+        std::cerr << "Failed to map instance buffer!" << std::endl;
+    }
+
     glVertexAttribIPointer(1,1,GL_UNSIGNED_INT,sizeof(GLuint),(void*)0);
     glEnableVertexAttribArray(1);
     glVertexAttribDivisor(1,1);
@@ -102,16 +112,20 @@ void Terrain::update_buffer_data(){
     size_t offset_size = 0;
 
     for(auto &chunk : chunk_positions){
-        (chunks_data[chunk])->cull_face(&instance_data);
+        (chunks_data[chunk])->cull_face(instance_buffer_ptr + offset_size);
+        unsigned int gpu_instance_count = (chunks_data[chunk])->instance_count;
+
         DrawArraysIndirectCommand cmd;
         {
             cmd.count = 4;
-            cmd.instanceCount = instance_data.size() - offset_size;
+            cmd.instanceCount = gpu_instance_count;
             cmd.first = 0;
             cmd.baseInstance = offset_size; // Used to access the correct chunk position
         }
+        std::cout << instance_data.size() - offset_size << " " << gpu_instance_count << std::endl;
         draw_commands.push_back(cmd);
-        offset_size = instance_data.size();
+
+        offset_size += gpu_instance_count;
     }
     is_buffer_updated = true;
 }
@@ -123,7 +137,7 @@ void Terrain:: upload_buffers(){
 
     glBufferData(GL_DRAW_INDIRECT_BUFFER, draw_commands.size() * sizeof(DrawArraysIndirectCommand),draw_commands.data(), GL_DYNAMIC_DRAW);
 
-    glBufferData(GL_ARRAY_BUFFER,instance_data.size() * sizeof(int), instance_data.data(),GL_DYNAMIC_DRAW);
+    //glBufferData(GL_ARRAY_BUFFER,instance_data.size() * sizeof(int), instance_data.data(),GL_DYNAMIC_DRAW);
     is_buffer_updated = false;
 }
 

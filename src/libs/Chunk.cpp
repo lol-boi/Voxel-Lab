@@ -73,8 +73,8 @@ Chunk::~Chunk(){
     }
 }
 
-void Chunk::cull_face(std::vector<int> * instance_data){
-
+void Chunk::cull_face(int* instance_data){
+    instance_count  = 0;
     int c_size2 = c_size*c_size;
 
     uint64_t* x_chunk = new uint64_t[c_size_p * c_size_p](); // coords y,z
@@ -200,7 +200,7 @@ int Chunk::pack_greedy_quads(int x, int y, int z, int normal, int texture, int h
     return data;
 }
 
-void Chunk::greedy_mesh(unsigned int* data, int dir, int key, std::vector<int> *instance_data){
+void Chunk::greedy_mesh(unsigned int* data, int dir, int key,int* instance_data){
     for(int row = 0; row<c_size; row++){
         int y = 0; //at what bit index are we at
         while(y < c_size){
@@ -222,15 +222,17 @@ void Chunk::greedy_mesh(unsigned int* data, int dir, int key, std::vector<int> *
             }
             int tex = key & 0xF;
             int z = key >> 4;
+            int packed_data  =0;
             if(dir /2 == 0){
-                instance_data->push_back(pack_greedy_quads(row, y, z, dir, tex, height-1, width-1));
+                packed_data = (pack_greedy_quads(row, y, z, dir, tex, height-1, width-1));
             }
             else if(dir / 2 == 1){
-                instance_data->push_back(pack_greedy_quads(z, y, row, dir, tex, height-1, width-1));
+                packed_data = (pack_greedy_quads(z, y, row, dir, tex, height-1, width-1));
             }
             else{
-                instance_data->push_back(pack_greedy_quads(y, z, row, dir, tex, height-1, width-1));
+                packed_data = (pack_greedy_quads(y, z, row, dir, tex, height-1, width-1));
             }
+            instance_data[instance_count++] = packed_data;
             y += height;
         }
     }
