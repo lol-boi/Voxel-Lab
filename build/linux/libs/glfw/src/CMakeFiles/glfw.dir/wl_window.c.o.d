@@ -22,6 +22,7 @@ libs/glfw/src/CMakeFiles/glfw.dir/wl_window.c.o: \
  /usr/include/bits/libm-simd-decl-stubs.h /usr/include/bits/floatn.h \
  /usr/include/bits/floatn-common.h /usr/include/bits/flt-eval-method.h \
  /usr/include/bits/fp-logb.h /usr/include/bits/fp-fast.h \
+ /usr/include/bits/mathcalls-macros.h \
  /usr/include/bits/mathcalls-helper-functions.h \
  /usr/include/bits/mathcalls.h /usr/include/bits/mathcalls-narrow.h \
  /usr/include/bits/iscanonical.h /usr/include/inttypes.h \
@@ -101,6 +102,7 @@ libs/glfw/src/CMakeFiles/glfw.dir/wl_window.c.o: \
  /usr/include/regex.h \
  /home/silva/projects/Voxel-Lab/src/libs/glfw/src/posix_thread.h \
  /usr/include/pthread.h /usr/include/sched.h /usr/include/bits/sched.h \
+ /usr/include/linux/sched/types.h \
  /usr/include/bits/types/struct_sched_param.h /usr/include/bits/cpu-set.h \
  /usr/include/time.h /usr/include/bits/time.h /usr/include/bits/timex.h \
  /usr/include/bits/types/struct_tm.h \

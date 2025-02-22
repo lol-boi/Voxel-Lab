@@ -22,6 +22,7 @@ libs/glfw/src/CMakeFiles/glfw.dir/window.c.o: \
  /usr/include/bits/libm-simd-decl-stubs.h /usr/include/bits/floatn.h \
  /usr/include/bits/floatn-common.h /usr/include/bits/flt-eval-method.h \
  /usr/include/bits/fp-logb.h /usr/include/bits/fp-fast.h \
+ /usr/include/bits/mathcalls-macros.h \
  /usr/include/bits/mathcalls-helper-functions.h \
  /usr/include/bits/mathcalls.h /usr/include/inttypes.h \
  /usr/lib/gcc/x86_64-pc-linux-gnu/14.2.1/include/stdarg.h \
