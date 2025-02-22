@@ -122,7 +122,7 @@ void Terrain::update_buffer_data(){
             cmd.first = 0;
             cmd.baseInstance = offset_size; // Used to access the correct chunk position
         }
-        std::cout << instance_data.size() - offset_size << " " << gpu_instance_count << std::endl;
+        //std::cout << instance_data.size() - offset_size << " " << gpu_instance_count << std::endl;
         draw_commands.push_back(cmd);
 
         offset_size += gpu_instance_count;
