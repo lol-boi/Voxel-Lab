@@ -17,6 +17,7 @@
 #include "libs/camera.h"
 #include "libs/shader.hpp"
 #include <glm/trigonometric.hpp>
+#include <mutex>
 #include <thread>
 #include <chrono>
 #include <iostream>
@@ -25,9 +26,10 @@
 #include "libs/imgui/imgui_impl_glfw.h"
 #include "libs/imgui/imgui_impl_opengl3.h"
 #include <stdio.h>
+using std::cout;
 
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void process_input(GLFWwindow* window, float input_debug);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
@@ -41,7 +43,6 @@ void set_polygon_mode();
 
 const unsigned int SCR_WIDTH = 1500;
 const unsigned int SCR_HEIGHT = 900;
-
 const float FPS_CAP = 60.0f;
 const float FRAME_DURATION = 1.0f / FPS_CAP;
 
@@ -60,6 +61,8 @@ float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT/ 2.0f;
 bool firstMouse = true;
 
+bool render_toggle = true;  // Controls chunk rendering
+std::mutex toggle_mutex;    // Mutex for thread safety
 
 int main(){
 
@@ -121,6 +124,13 @@ int main(){
             ImGui::Text("Current camera positon: [%.1f, %.1f, %.1f]",camera.Position.x, camera.Position.y, camera.Position.z);               // Display some text (you can use a format strings too)
             ImGui::Text("Current rendered chunks: %d ",terrain.render_distance);
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+            bool local_render_toggle;
+            {
+                std::lock_guard<std::mutex> lock(toggle_mutex);
+                local_render_toggle = render_toggle;
+            }
+
+            ImGui::Text("Chunk Rendering: %s", local_render_toggle ? "ON" : "OFF");
             ImGui::End();
         }
 
@@ -166,7 +176,6 @@ int main(){
     }
     //deallocation of buffers
 
-    ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
     //terminate
@@ -231,10 +240,26 @@ void process_input(GLFWwindow *window, float input_dbug) {
         mKeyWasPressed = false;
     }
 
-
+    static bool p_key_pressed = false;
     if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) {
-        set_polygon_mode();
+        p_key_pressed = true;
     }
+    if (glfwGetKey(window, GLFW_KEY_P) == GLFW_RELEASE && p_key_pressed) {
+        set_polygon_mode();
+        p_key_pressed = false;
+    }
+
+    static bool r_key_was_pressed = false;
+        if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS) {
+            if (!r_key_was_pressed) {  // Detect key press (not hold)
+                std::lock_guard<std::mutex> lock(toggle_mutex);
+                render_toggle = !render_toggle;  // Toggle state
+            }
+            r_key_was_pressed = true;
+        } else {
+            r_key_was_pressed = false;
+        }
+
 }
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height){
@@ -335,7 +360,16 @@ void thread_function(Terrain &t) {
     const std::chrono::milliseconds interval(50); // Time interval (50ms)
     while (true) {
         auto start = std::chrono::steady_clock::now();
-        bool state = t.init_world_chunks(camera.Position);
+        bool local_toggle;
+        glm::vec3 local_camera_pos;
+        {
+            std::lock_guard<std::mutex> lock(toggle_mutex);
+            local_toggle = render_toggle;
+            local_camera_pos = camera.Position;
+        }
+        if(local_toggle){
+            t.init_world_chunks(local_camera_pos);
+        }
 
         auto end = std::chrono::steady_clock::now();
         std::chrono::duration<double> elapsed = end - start;
