@@ -36,7 +36,7 @@ Terrain::Terrain(int render_dist,int seed){
 
     glGenBuffers(1, &vbo);
     glGenVertexArrays(1, &vao);
-    glGenBuffers(1, &ibo);
+    glGenBuffers(1, &gpu_mapped_ibo);
 
     glBindVertexArray(vao);
 
@@ -45,11 +45,15 @@ Terrain::Terrain(int render_dist,int seed){
     glVertexAttribPointer(0, 3, GL_FLOAT,GL_FALSE,sizeof(float)*3, (void*)0);
     glEnableVertexAttribArray(0);
 
-    glBindBuffer(GL_ARRAY_BUFFER, ibo);
+    glBindBuffer(GL_ARRAY_BUFFER, gpu_mapped_ibo);
     glBufferStorage(GL_ARRAY_BUFFER, max_instances * sizeof(int), nullptr, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
     instance_buffer_ptr = (int*)glMapBufferRange(GL_ARRAY_BUFFER, 0, max_instances * sizeof(GLuint), GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
     if (!instance_buffer_ptr) {
         std::cerr << "Failed to map instance buffer!" << std::endl;
+    }
+
+    for(int i = 0; i<max_instances; i++){
+        free_offsets.push(i);
     }
 
     glVertexAttribIPointer(1,1,GL_UNSIGNED_INT,sizeof(GLuint),(void*)0);
@@ -107,7 +111,6 @@ bool Terrain::init_world_chunks(glm::vec3 cam_pos){
 
 void Terrain::update_buffer_data(){
     draw_commands.clear();
-    instance_data.clear();
 
     size_t offset_size = 0;
 
@@ -137,7 +140,6 @@ void Terrain:: upload_buffers(){
 
     glBufferData(GL_DRAW_INDIRECT_BUFFER, draw_commands.size() * sizeof(DrawArraysIndirectCommand),draw_commands.data(), GL_DYNAMIC_DRAW);
 
-    //glBufferData(GL_ARRAY_BUFFER,instance_data.size() * sizeof(int), instance_data.data(),GL_DYNAMIC_DRAW);
     is_buffer_updated = false;
 }
 
