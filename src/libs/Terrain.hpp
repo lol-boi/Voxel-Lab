@@ -5,6 +5,7 @@
 #include "glad/include/glad/glad.h"
 #include <glm/glm.hpp>
 #include <mutex>
+#include <queue>
 #include <unordered_map>
 #include <vector>
 
@@ -37,7 +38,6 @@ class Terrain{
 
         bool is_buffer_updated;
         int render_distance;
-        std::vector<int> instance_data;
 
         bool init_world_chunks(glm::vec3);
         void update_buffer_data();
@@ -48,7 +48,7 @@ class Terrain{
 
     private:
         std::vector<float> vertices;
-        unsigned int vbo, vao, ibo;
+        unsigned int vbo, vao, gpu_mapped_ibo;
         unsigned int indirect_buffer;
         unsigned int ssbo;
         int * instance_buffer_ptr;
@@ -61,6 +61,10 @@ class Terrain{
         std::vector<DrawArraysIndirectCommand> draw_commands;
         std::vector<glm::vec4> chunk_positions;
         std::unordered_map<glm::ivec3, Chunk*,ivec3_hash> chunks_data;
+
+        //std::unordered_map<glm::ivec3, int> chunk_offset_map;
+        std::queue<int> free_offsets;
+        std::vector<glm::ivec3> active_chunks;
 };
 
 #endif
