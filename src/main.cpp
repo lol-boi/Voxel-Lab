@@ -81,7 +81,7 @@ int main(){
     shader_program.set_int("texture2", 1);
 
 
-    Terrain terrain = Terrain(12,123);
+    Terrain terrain = Terrain(2,123);
     camera.Position = glm::vec3(32*10,255,32*10);
 
     terrain.init_world_chunks(camera.Position);

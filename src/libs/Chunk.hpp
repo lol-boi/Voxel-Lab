@@ -20,6 +20,7 @@ public:
     void cull_face(int *);
     bool chunk_data_present;
     unsigned int instance_count;
+    int gpu_mem_offset;
 private:
     int *chunk_data;
     int pack_data(int,int,int,int,int);
