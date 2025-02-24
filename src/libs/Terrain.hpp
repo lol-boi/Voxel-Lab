@@ -10,13 +10,13 @@
 #include <vector>
 
 struct ivec3_hash {
-    std::size_t operator()(const glm::ivec3& v) const noexcept {
-        std::hash<int> hasher;
-        std::size_t seed = 0;
-        seed ^= hasher(v.x) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-        seed ^= hasher(v.y) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-        seed ^= hasher(v.z) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-        return seed;
+    std::size_t operator()(const glm::ivec3& v) const {
+        std::size_t h1 = std::hash<int>()(v.x);
+        std::size_t h2 = std::hash<int>()(v.y);
+        std::size_t h3 = std::hash<int>()(v.z);
+
+        // Use large prime numbers for better bit spreading
+        return h1 ^ (h2 * 73856093) ^ (h3 * 19349663);
     }
 };
 struct DrawArraysIndirectCommand {
@@ -59,12 +59,13 @@ class Terrain{
         std::mutex buffer_mutex;
 
         std::vector<DrawArraysIndirectCommand> draw_commands;
-        std::vector<glm::vec4> chunk_positions;
+        std::vector<glm::ivec4> chunk_positions;
         std::unordered_map<glm::ivec3, Chunk*,ivec3_hash> chunks_data;
 
-        //std::unordered_map<glm::ivec3, int> chunk_offset_map;
+        std::unordered_map<glm::ivec3, int,ivec3_hash> chunk_offset_map;
         std::queue<int> free_offsets;
         std::vector<glm::ivec3> active_chunks;
+        int max_instances = 6 *32 * 32;
 };
 
 #endif

@@ -3,7 +3,7 @@
 layout(location = 0) in vec3 vertex_pos;
 layout(location = 1) in int packed_instance_data;
 layout(std430, binding = 0) buffer ChunkPositions {
-    vec4 chunk_positions[];
+    ivec4 chunk_positions[];
 };
 
 out vec2 tex_coord;
