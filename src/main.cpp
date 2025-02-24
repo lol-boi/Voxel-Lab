@@ -81,11 +81,10 @@ int main(){
     shader_program.set_int("texture2", 1);
 
 
-    Terrain terrain = Terrain(2,123);
+    Terrain terrain = Terrain(4,123);
     camera.Position = glm::vec3(32*10,255,32*10);
 
     terrain.init_world_chunks(camera.Position);
-    terrain.upload_buffers();
 
     std::thread tick(thread_function,std::ref(terrain));
     tick.detach();
@@ -106,6 +105,13 @@ int main(){
         lastFrame = currentFrame;
 
         process_input(window,false);
+
+
+        // Update chunks in the main thread
+        //{
+        //    std::lock_guard<std::mutex> lock(terrain.buffer_mutex);
+        //    terrain.init_world_chunks(camera.Position);
+        //}
 
         //terrain.init_world_chunks(camera.Position);
 
@@ -143,6 +149,7 @@ int main(){
         glBindTexture(GL_TEXTURE_2D, texture2);
 
         shader_program.use();
+        shader_program.set_int("max_instances", terrain.max_instances);
 
         glm::mat4 model = glm::mat4(1.0f);
         unsigned int model_loc = glGetUniformLocation(shader_program.ID, "model");
@@ -160,9 +167,6 @@ int main(){
         glUniformMatrix4fv(view_loc, 1, GL_FALSE, &view[0][0]);
 
 
-        if(terrain.is_buffer_updated == true){
-            terrain.upload_buffers();
-        }
         terrain.draw_terrain();
 
         ImGui::Render();
@@ -368,6 +372,7 @@ void thread_function(Terrain &t) {
             local_camera_pos = camera.Position;
         }
         if(local_toggle){
+            //std::cout << "Using thread function to update the buffer" << std::endl;
             t.init_world_chunks(local_camera_pos);
         }
 

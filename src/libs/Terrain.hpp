@@ -38,12 +38,14 @@ class Terrain{
 
         bool is_buffer_updated;
         int render_distance;
+        std::mutex buffer_mutex;
+        int max_instances = 6 *32 * 32;
 
         bool init_world_chunks(glm::vec3);
-        void update_buffer_data();
-        void update_chunk(); // When we destroy or insert a block
+        //void update_buffer_data();
+        //void update_chunk(); // When we destroy or insert a block
         void draw_terrain();
-        void upload_buffers();
+        //void upload_buffers();
         int chunk_count();
 
     private:
@@ -52,11 +54,12 @@ class Terrain{
         unsigned int indirect_buffer;
         unsigned int ssbo;
         int * instance_buffer_ptr;
+        DrawArraysIndirectCommand *draw_command_ptr;
+        glm::vec4 *ssbo_ptr;
 
         int chunk_size;
         int world_seed;
         glm::ivec2 prev_chunk_pos;
-        std::mutex buffer_mutex;
 
         std::vector<DrawArraysIndirectCommand> draw_commands;
         std::vector<glm::ivec4> chunk_positions;
@@ -65,7 +68,7 @@ class Terrain{
         std::unordered_map<glm::ivec3, int,ivec3_hash> chunk_offset_map;
         std::queue<int> free_offsets;
         std::vector<glm::ivec3> active_chunks;
-        int max_instances = 6 *32 * 32;
+        int max_chunks;
 };
 
 #endif

@@ -3,17 +3,21 @@
 layout(location = 0) in vec3 vertex_pos;
 layout(location = 1) in int packed_instance_data;
 layout(std430, binding = 0) buffer ChunkPositions {
-    ivec4 chunk_positions[];
+    vec4 chunk_positions[];
 };
 
 out vec2 tex_coord;
 
+uniform int max_instances;
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 
 void main()
 {
+
+    //uint chunk_offset = gl_BaseInstance / max_instances;
+    //vec3 chunk_coords = chunk_positions[chunk_offset].xyz;
     vec3 chunk_coords = chunk_positions[gl_DrawID].xyz;
 
     //unpacking the data
