@@ -94,7 +94,7 @@ bool Terrain::init_world_chunks(glm::vec3 cam_pos){
         glm::ivec3 pos = it->first;
         float dist = glm::distance(glm::vec2(pos.x, pos.z), glm::vec2(current_chunk_pos));
         if (dist > render_distance) {
-            //std::cout << "Removing chunk" << std::endl;
+            //std::cout << "Removing chunk" << "(" << pos.x << "," << pos.y <<","<< pos.z<< ")" << std::endl;
             unsigned int offset = chunk_offset_map[pos];
 
             // Mark buffers as unused
@@ -111,6 +111,9 @@ bool Terrain::init_world_chunks(glm::vec3 cam_pos){
         }
     }
 
+    //Inserting new chunks and updating buffers for them(ssbo,index,indirect)
+
+    int largest_instance = 0;
     for (int x = x_chunk - render_distance; x <= x_chunk + render_distance; ++x) {
         for (int z = z_chunk - render_distance; z <= z_chunk + render_distance; ++z) {
             for (int y = 0; y < 8; ++y) {
@@ -127,10 +130,16 @@ bool Terrain::init_world_chunks(glm::vec3 cam_pos){
                 free_offsets.pop();
 
                 // Initialize chunk
+
+                //std::cout << "Adding chunk" << "(" << pos.x << "," << pos.y <<","<< pos.z<< ")" << std::endl;
                 Chunk* chunk = new Chunk(pos);
                 chunk->gen_chunk_data(world_seed);
                 chunk->cull_face(instance_buffer_ptr + offset * max_instances);
-
+                {
+                    if(chunk->instance_count > largest_instance){
+                        largest_instance = chunk->instance_count;
+                    }
+                }
                 // Update buffers
                 ssbo_ptr[offset] = glm::vec4(pos.x, pos.y, pos.z, 0);
                 draw_command_ptr[offset] = {
@@ -145,6 +154,11 @@ bool Terrain::init_world_chunks(glm::vec3 cam_pos){
             }
         }
     }
+
+   {
+       std::cout << largest_instance << std::endl;
+   }
+
     prev_chunk_pos = current_chunk_pos;
     return true;
 }
@@ -160,7 +174,6 @@ void Terrain::draw_terrain(){
     if (err != GL_NO_ERROR) {
         std::cerr << "OpenGL Error: " << err << std::endl;
     }
-    //glMultiDrawArraysIndirect(GL_TRIANGLE_STRIP, nullptr, draw_commands.size(),0);
 }
 
 int Terrain::chunk_count(){
