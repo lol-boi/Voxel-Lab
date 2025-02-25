@@ -26,7 +26,6 @@
 #include "libs/imgui/imgui_impl_glfw.h"
 #include "libs/imgui/imgui_impl_opengl3.h"
 #include <stdio.h>
-using std::cout;
 
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
@@ -81,7 +80,7 @@ int main(){
     shader_program.set_int("texture2", 1);
 
 
-    Terrain terrain = Terrain(4,123);
+    Terrain terrain = Terrain(12,123);
     camera.Position = glm::vec3(32*10,255,32*10);
 
     terrain.init_world_chunks(camera.Position);
@@ -105,15 +104,6 @@ int main(){
         lastFrame = currentFrame;
 
         process_input(window,false);
-
-
-        // Update chunks in the main thread
-        //{
-        //    std::lock_guard<std::mutex> lock(terrain.buffer_mutex);
-        //    terrain.init_world_chunks(camera.Position);
-        //}
-
-        //terrain.init_world_chunks(camera.Position);
 
         //rendering__________________________________
 
@@ -156,7 +146,7 @@ int main(){
         glUniformMatrix4fv(model_loc, 1, GL_FALSE, &model[0][0]);
 
         glm::mat4 projection = glm::mat4(1.0f);
-        projection = glm::perspective(glm::radians(45.0f),(float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 256.0f);
+        projection = glm::perspective(glm::radians(45.0f),(float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 1000.0f);
         unsigned int projcetion_loc = glGetUniformLocation(shader_program.ID, "projection");
         glUniformMatrix4fv(projcetion_loc, 1, GL_FALSE, &projection[0][0]);
 
@@ -363,6 +353,7 @@ void set_polygon_mode(){
 void thread_function(Terrain &t) {
     const std::chrono::milliseconds interval(50); // Time interval (50ms)
     while (true) {
+
         auto start = std::chrono::steady_clock::now();
         bool local_toggle;
         glm::vec3 local_camera_pos;
@@ -372,7 +363,6 @@ void thread_function(Terrain &t) {
             local_camera_pos = camera.Position;
         }
         if(local_toggle){
-            //std::cout << "Using thread function to update the buffer" << std::endl;
             t.init_world_chunks(local_camera_pos);
         }
 

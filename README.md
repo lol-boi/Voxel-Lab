@@ -120,13 +120,14 @@ project/
 ## TODO
 
 - **Complete the rendering using voxel pooling technique**: [High-Performance Voxel Engine](https://nickmcd.me/2021/04/04/high-performance-voxel-engine/).
+  - Rework on the chunk delete and init logic.
+  - Handle buckets efficiently(Smaller Fixed sized buckets or even some big size bucketes 2X).
+  - Log chunk Init time.
+  - Maybe chunk loading and Unloading from the Persistant storage.
 - **Improve the texture assets**: Use solid colors instead of textures depending on the world height.
 - **Enhance terrain generation**: Make the terrain generation more robust and feature-packed instead of just bland rendering.
 - **Refactor and optimize**: Once the above tasks are completed, refactor the code, optimize memory usage, and add comments for clarity.
 
-## License
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 ## Acknowledgments
 
