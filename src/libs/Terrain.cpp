@@ -82,7 +82,6 @@ bool Terrain::init_world_chunks(glm::vec3 cam_pos){
     int z_chunk = (int) cam_pos.z / chunk_size;
     glm::ivec2 current_chunk_pos(x_chunk, z_chunk);
 
-
     if(prev_chunk_pos == current_chunk_pos){
         return false;
     }
@@ -92,9 +91,10 @@ bool Terrain::init_world_chunks(glm::vec3 cam_pos){
     // Remove out-of-range chunks
     for (auto it = chunks_data.begin(); it != chunks_data.end();) {
         glm::ivec3 pos = it->first;
-        float dist = glm::distance(glm::vec2(pos.x, pos.z), glm::vec2(current_chunk_pos));
-        if (dist > render_distance) {
-            //std::cout << "Removing chunk" << "(" << pos.x << "," << pos.y <<","<< pos.z<< ")" << std::endl;
+
+        float x_dist = abs(pos.x-current_chunk_pos.x);
+        float z_dist = abs(pos.z - current_chunk_pos.y);
+        if (render_distance < x_dist || render_distance < z_dist) {
             unsigned int offset = chunk_offset_map[pos];
 
             // Mark buffers as unused
@@ -130,8 +130,6 @@ bool Terrain::init_world_chunks(glm::vec3 cam_pos){
                 free_offsets.pop();
 
                 // Initialize chunk
-
-                //std::cout << "Adding chunk" << "(" << pos.x << "," << pos.y <<","<< pos.z<< ")" << std::endl;
                 Chunk* chunk = new Chunk(pos);
                 chunk->gen_chunk_data(world_seed);
                 chunk->cull_face(instance_buffer_ptr + offset * max_instances);
@@ -154,7 +152,6 @@ bool Terrain::init_world_chunks(glm::vec3 cam_pos){
             }
         }
     }
-
    {
        std::cout << largest_instance << std::endl;
    }
