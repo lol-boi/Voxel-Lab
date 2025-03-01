@@ -6,8 +6,6 @@
 #include <array>
 #include <unordered_map>
 #include <limits.h>
-#include <vector>
-#include <iostream>
 
 Chunk::Chunk(glm::vec3 pos) : chunk_data(nullptr) {
     chunk_pos_in_world = pos;

@@ -2,9 +2,8 @@
 #define TERRAIN_HPP
 #include <cmath>
 #include "Chunk.hpp"
-#include "glad/include/glad/glad.h"
+#include "../external/glad/include/glad/glad.h"
 #include <glm/glm.hpp>
-#include <mutex>
 #include <queue>
 #include <unordered_map>
 #include <vector>
@@ -34,18 +33,12 @@ struct DrawArraysIndirectCommand {
 
 class Terrain{
     public:
-        Terrain(int no_of_chunks,int seed);
-
-        bool is_buffer_updated;
         int render_distance;
-        std::mutex buffer_mutex;
-        int max_instances = 6 *32 * 32;
+        int bucket_size1 = 3 * 32 * 32; // (max_instances / 2)
 
+        Terrain(int no_of_chunks,int seed);
         bool init_world_chunks(glm::vec3);
-        //void update_buffer_data();
-        //void update_chunk(); // When we destroy or insert a block
         void draw_terrain();
-        //void upload_buffers();
         int chunk_count();
 
     private:
@@ -66,7 +59,7 @@ class Terrain{
         std::unordered_map<glm::ivec3, Chunk*,ivec3_hash> chunks_data;
 
         std::unordered_map<glm::ivec3, int,ivec3_hash> chunk_offset_map;
-        std::queue<int> free_offsets;
+        std::queue<int> free_offsets1;
         std::vector<glm::ivec3> active_chunks;
         int max_chunks;
 };

@@ -120,7 +120,6 @@ project/
 ## TODO
 
 - **Complete the rendering using voxel pooling technique**: [High-Performance Voxel Engine](https://nickmcd.me/2021/04/04/high-performance-voxel-engine/).
-  - Rework on the chunk delete and init logic.
   - Handle buckets efficiently(Smaller Fixed sized buckets or even some big size bucketes 2X).
   - Log chunk Init time.
   - Maybe chunk loading and Unloading from the Persistant storage.
