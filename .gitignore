@@ -1,4 +1,3 @@
-build/linux/CMakeCache.txt
-build/linux/CMakeFiles
+build/linux/
 cmake_install.cmake
 Makefile
