@@ -4,6 +4,7 @@
 #include <GL/glext.h>
 #include "external/glfw/include/GLFW/glfw3.h"
 #include "libs/stb_image.h"
+#include <atomic>
 #include <cwchar>
 #include <glm/detail/qualifier.hpp>
 #include <glm/ext/matrix_clip_space.hpp>
@@ -49,6 +50,7 @@ float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
 bool mouseDetached = false;
+std::atomic<bool> thread_running(true);
 
 bool show_demo_window = true;
 bool show_another_window = false;
@@ -70,11 +72,9 @@ int main(){
     Shader shader_program("../../src/libs/vs.glsl","../../src/libs/fs.glsl");
     const char*  texture_path1 = "../../src/res/awesomeface.png";
     const char* texture_path2 = "../../src/res/atlas1.png";
-    //const char* texture_path3 = "../../src/res/up.png";
     unsigned int texture1, texture2;
     texture1 = set_texture(texture_path1,true);
     texture2 = set_texture(texture_path2,true);
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     shader_program.use();
     shader_program.set_int("texture1", 0);
     shader_program.set_int("texture2", 1);
@@ -82,7 +82,6 @@ int main(){
 
     Terrain terrain = Terrain(3,123);
     camera.Position = glm::vec3(32*10,255,32*10);
-
     terrain.init_world_chunks(camera.Position);
 
     std::thread tick(thread_function,std::ref(terrain));
@@ -157,7 +156,7 @@ int main(){
         glUniformMatrix4fv(view_loc, 1, GL_FALSE, &view[0][0]);
 
 
-        terrain.draw_terrain();
+        terrain.draw();
 
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -168,6 +167,8 @@ int main(){
             std::this_thread::sleep_for(std::chrono::duration<float>(FRAME_DURATION - frameTime));
         }
     }
+
+    thread_running = false;
     //deallocation of buffers
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
@@ -175,8 +176,10 @@ int main(){
     //terminate
 
     glfwDestroyWindow(window);
+    glDeleteTextures(1, &texture1);
+    glDeleteTextures(1, &texture2);
     glfwTerminate();
-    tick.join();
+    //tick.join();
     return 0;
 }
 
@@ -289,10 +292,10 @@ GLFWwindow* init_glfw(){
 
     //window is created using glfw and error handling is done
     GLFWwindow* window = glfwCreateWindow(SCR_WIDTH , SCR_HEIGHT, "VoxelLabs", NULL, NULL);
-    if(window == NULL){
+    if(window == nullptr){
         std::cout << "ERROR WINDOW NOT INIT" << std::endl;
         glfwTerminate();
-        return 0;
+        return nullptr;
     }
 
     glfwMakeContextCurrent(window);
@@ -352,7 +355,7 @@ void set_polygon_mode(){
 
 void thread_function(Terrain &t) {
     const std::chrono::milliseconds interval(50); // Time interval (50ms)
-    while (true) {
+    while (thread_running) {
 
         auto start = std::chrono::steady_clock::now();
         bool local_toggle;

@@ -1,11 +1,10 @@
 #include "Terrain.hpp"
-#include "../external/glad/include/glad/glad.h"
+#include "Renderer.hpp"
 #include <cstdlib>
 #include <cwchar>
 #include <glm/ext/vector_int3.hpp>
 #include <glm/glm.hpp>
 #include <queue>
-#include <vector>
 #include "Chunk.hpp"
 #include <cmath>
 #include <iostream>
@@ -17,61 +16,17 @@ Terrain::Terrain(int render_dist,int seed){
     world_seed = seed;
     render_distance = render_dist;
     prev_chunk_pos = glm::ivec2(0,0);
-    vertices = {
-        -0.5f, -0.5f, 0.5f,
-         0.5f, -0.5f, 0.5f,
-        -0.5f,  0.5f, 0.5f,
-         0.5f,  0.5f, 0.5f
-    };
 
 
+    bucket_size1 = 3 * chunk_size * chunk_size;
     max_chunks = (render_distance * 2 + 1) * (render_distance * 2 + 1) * 8; // x * z * y levels
 
-    glGenBuffers(1,&indirect_buffer);
-    glBindBuffer(GL_DRAW_INDIRECT_BUFFER, indirect_buffer);
+    scene = new Render(max_chunks, bucket_size1);
 
-    glGenBuffers(1,&ssbo);
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
-
-    glGenBuffers(1, &vbo);
-    glGenVertexArrays(1, &vao);
-    glGenBuffers(1, &gpu_mapped_ibo);
-
-    glBindVertexArray(vao);
-
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT,GL_FALSE,sizeof(float)*3, (void*)0);
-    glEnableVertexAttribArray(0);
-
-    glBindBuffer(GL_ARRAY_BUFFER, gpu_mapped_ibo);
-    int size = (max_chunks * bucket_size1);
-    glBufferStorage(GL_ARRAY_BUFFER,size * sizeof(int), nullptr, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
-    instance_buffer_ptr = (int*)glMapBufferRange(GL_ARRAY_BUFFER, 0, size * sizeof(GLuint), GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
-    if (!instance_buffer_ptr) {
-        std::cerr << "Failed to map instance buffer!" << std::endl;
-    }
-
-
-    glVertexAttribIPointer(1,1,GL_UNSIGNED_INT,sizeof(GLuint),(void*)0);
-    glEnableVertexAttribArray(1);
-    glVertexAttribDivisor(1,1);
-
-    glBindBuffer(GL_DRAW_INDIRECT_BUFFER, indirect_buffer);
-    glBufferStorage(GL_DRAW_INDIRECT_BUFFER, max_chunks * sizeof(DrawArraysIndirectCommand), nullptr, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
-    draw_command_ptr = (DrawArraysIndirectCommand*)glMapBufferRange(GL_DRAW_INDIRECT_BUFFER, 0, max_chunks * sizeof(DrawArraysIndirectCommand), GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
-
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
-    glBufferStorage(GL_SHADER_STORAGE_BUFFER, max_chunks * sizeof(glm::vec4), nullptr, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
-    ssbo_ptr = (glm::vec4*)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, max_chunks * sizeof(glm::vec4), GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
-
-    memset(ssbo_ptr, 0, max_chunks * sizeof(glm::vec4));
-
+    //init empty buckets
     for(int i = 0; i<max_chunks; i++){
         free_offsets1.push(i);
     }
-
-    glBindVertexArray(0);
 }
 
 
@@ -86,7 +41,6 @@ bool Terrain::init_world_chunks(glm::vec3 cam_pos){
         return false;
     }
 
-
     // Remove out-of-range chunks
     for (auto it = chunks_data.begin(); it != chunks_data.end();) {
         glm::ivec3 pos = it->first;
@@ -97,8 +51,8 @@ bool Terrain::init_world_chunks(glm::vec3 cam_pos){
             unsigned int offset = chunk_offset_map[pos];
 
             // Mark buffers as unused
-            ssbo_ptr[offset] = glm::vec4(0.0f);
-            draw_command_ptr[offset].instanceCount = 0;
+            scene->ssbo_ptr[offset] = glm::vec4(0.0f);
+            scene->draw_command_ptr[offset].instanceCount = 0;
             free_offsets1.push(offset);
 
             // Cleanup
@@ -110,63 +64,53 @@ bool Terrain::init_world_chunks(glm::vec3 cam_pos){
         }
     }
 
-    //Inserting new chunks and updating buffers for them(ssbo,index,indirect)
 
-    int largest_instance = 0;
+    //Inserting new chunks and updating buffers for them(ssbo,index,indirect)
     for (int x = x_chunk - render_distance; x <= x_chunk + render_distance; ++x) {
         for (int z = z_chunk - render_distance; z <= z_chunk + render_distance; ++z) {
             for (int y = 0; y < 8; ++y) {
-                glm::ivec3 pos(x, y, z);
-                if (chunks_data.find(pos) != chunks_data.end()) continue;
 
-                // Initialize chunk
+                glm::ivec3 pos(x, y, z);
+                if (chunks_data.find(pos) != chunks_data.end()) continue; //if chunk is already present in chunks_data skip its initlization
+
                 Chunk* chunk = new Chunk(pos);
                 chunk->gen_chunk_data(world_seed);
-                //chunk->cull_face(instance_buffer_ptr + offset * bucket_size1);
 
-                if(free_offsets1.empty()){
+                if(!free_offsets1.empty()){
+                    unsigned int offset = free_offsets1.front();
+                    free_offsets1.pop();
+
+                    //buffer updates(instance_buffer, SSBO, Draw_commands)
+                    chunk->cull_face(scene->instance_buffer_ptr + offset * bucket_size1);
+                    scene->ssbo_ptr[offset] = glm::vec4(pos.x, pos.y, pos.z, 0);
+                    scene->draw_command_ptr[offset] = {
+                        4, // Vertices per instance
+                        chunk->instance_count,
+                        0, // First vertex
+                        offset * bucket_size1
+                    };
+                    chunks_data[pos] = chunk;
+                    chunk_offset_map[pos] = offset;
+
+                }else{
                     std::cerr << "No empty buckets found!!" << std::endl;
-                    continue;
                 }
-                unsigned int offset = free_offsets1.front();
-                free_offsets1.pop();
-                chunk->cull_face(instance_buffer_ptr + offset * bucket_size1);
 
-                // Update buffers
-                ssbo_ptr[offset] = glm::vec4(pos.x, pos.y, pos.z, 0);
-                draw_command_ptr[offset] = {
-                    4, // Vertices per instance
-                    chunk->instance_count,
-                    0, // First vertex
-                    offset * bucket_size1
-                };
-
-                chunks_data[pos] = chunk;
-                chunk_offset_map[pos] = offset;
             }
         }
     }
-   {
-       std::cout << largest_instance << std::endl;
-   }
 
     prev_chunk_pos = current_chunk_pos;
     return true;
 }
 
-
-
-void Terrain::draw_terrain(){
-
-    glBindVertexArray(vao);
-    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo);
-    glMultiDrawArraysIndirect(GL_TRIANGLE_STRIP, nullptr, max_chunks, 0);
-    GLenum err = glGetError();
-    if (err != GL_NO_ERROR) {
-        std::cerr << "OpenGL Error: " << err << std::endl;
-    }
+void Terrain::draw(){
+    scene->draw(max_chunks);
 }
 
-int Terrain::chunk_count(){
-    return chunk_positions.size();
+Terrain::~Terrain(){
+    delete scene;
+    for (auto& [pos, chunk] : chunks_data) {
+        delete chunk;
+    }
 }

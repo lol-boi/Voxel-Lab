@@ -20,26 +20,9 @@ std::string Shader::read_file_to_string(const char* file_path){
 }
 
 Shader::Shader(const char* vertex_path, const char* fragment_path) {
-    //std::cout << vertex_path << std:: endl;
-    //std::cout << fragment_path <<std::endl;
     std::string vertexCode = read_file_to_string(vertex_path);
     std::string fragmentCode = read_file_to_string(fragment_path);
 
-    //vShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-    //fShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-    //try {
-    //    vShaderFile.open(vertex_path);
-    //    fShaderFile.open(fragment_path);
-    //    std::stringstream vShaderStream, fShaderStream;
-    //    vShaderStream << vShaderFile.rdbuf();
-    //    fShaderStream << fShaderFile.rdbuf();
-    //    vShaderFile.close();
-    //    fShaderFile.close();
-    //    vertexCode = vShaderStream.str();
-    //    fragmentCode = fShaderStream.str();
-    //} catch(std::ifstream::failure& e) {
-    //    std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl;
-    //}
     const char* vShaderCode = vertexCode.c_str();
     const char* fShaderCode = fragmentCode.c_str();
 
@@ -93,4 +76,9 @@ void Shader::set_int(const std::string &name, int value) const {
 
 void Shader::set_float(const std::string &name, float value) const {
     glUniform1f(glGetUniformLocation(ID, name.c_str()), value);
+}
+
+
+Shader::~Shader(){
+    glDeleteProgram(ID);
 }

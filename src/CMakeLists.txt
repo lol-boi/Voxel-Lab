@@ -29,16 +29,17 @@ add_library(image SHARED ${LIBS_DIR}/stb_image.c)
 add_library(shader SHARED ${LIBS_DIR}/shader.cpp)
 add_library(chunk SHARED ${LIBS_DIR}/Chunk.cpp)
 add_library(terrain SHARED ${LIBS_DIR}/Terrain.cpp)
+add_library(renderer SHARED ${LIBS_DIR}/Renderer.cpp)
 
 # Set common include directory for all libraries
-foreach(lib image shader chunk terrain)
+foreach(lib image shader renderer chunk terrain )
     target_include_directories(${lib} PUBLIC ${LIBS_DIR})
 endforeach()
 
 # Set dependencies
 target_link_libraries(shader PUBLIC glad)
 target_link_libraries(chunk PUBLIC glad)
-target_link_libraries(terrain PUBLIC chunk glad)
+target_link_libraries(terrain PUBLIC renderer chunk glad)
 
 # Add the executable
 add_executable(${PROJECT_NAME} main.cpp)

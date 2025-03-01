@@ -9,7 +9,6 @@
 
 Chunk::Chunk(glm::vec3 pos) : chunk_data(nullptr) {
     chunk_pos_in_world = pos;
-    chunk_data_present = false;
 }
 
 void Chunk::gen_chunk_data(int seed){
@@ -61,7 +60,6 @@ void Chunk::gen_chunk_data(int seed){
             }
         }
     }
-    chunk_data_present = true;
 }
 
 Chunk::~Chunk(){
@@ -123,9 +121,9 @@ void Chunk::cull_face(int* instance_data){
         }
     }
 
-    delete [] x_chunk;
-    delete [] y_chunk;
-    delete [] z_chunk;
+    delete [] x_chunk; x_chunk = nullptr;
+    delete [] y_chunk; y_chunk = nullptr;
+    delete [] z_chunk; z_chunk = nullptr;
 
 
     std::unordered_map<int, std::array<unsigned int, 32>> arr[6]; //using int here could use a smaller data type cuse we are only storing pos (0-31) and block type here;
@@ -173,15 +171,16 @@ void Chunk::cull_face(int* instance_data){
         }
     }
 
-    delete []culled_x;
-    delete []culled_y;
-    delete []culled_z;
+    delete []culled_x; culled_x = nullptr;
+    delete []culled_y; culled_y = nullptr;
+    delete []culled_z; culled_z = nullptr;
 
     for(int face = 0; face<=5; face++){
         for(auto i : arr[face]){
             greedy_mesh(i.second.data(),face,i.first, instance_data);
         }
     }
+
 }
 
 
@@ -191,7 +190,7 @@ int Chunk::pack_greedy_quads(int x, int y, int z, int normal, int texture, int h
     data |= (x & 31);               // 5 bits for x (0-31)
     data |= (y & 31) << 5;          // 5 bits for y (0-31)
     data |= (z & 31) << 10;         // 5 bits for z (0-31)
-    data |= (normal & 7) << 15;     // 3 bits for normal (0-7)
+    data |= (normal & 7) << 15;     // 3 bits for normal (0-7) //should be updated when the normal will be send via ssbo
     data |= (texture & 15) << 18;   // 4 bits for texture index (0-15)
     data |= (height & 31) << 22;    // 5 bits for height of quad
     data |= (width & 31) << 27;     // 5 bits for width of quad
@@ -199,6 +198,7 @@ int Chunk::pack_greedy_quads(int x, int y, int z, int normal, int texture, int h
 }
 
 void Chunk::greedy_mesh(unsigned int* data, int dir, int key,int* instance_data){
+    //
     for(int row = 0; row<c_size; row++){
         int y = 0; //at what bit index are we at
         while(y < c_size){
