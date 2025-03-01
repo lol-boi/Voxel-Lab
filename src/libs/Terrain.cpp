@@ -1,10 +1,10 @@
 #include "Terrain.hpp"
-#include "glad/include/glad/glad.h"
+#include "../external/glad/include/glad/glad.h"
 #include <cstdlib>
 #include <cwchar>
 #include <glm/ext/vector_int3.hpp>
 #include <glm/glm.hpp>
-#include <mutex>
+#include <queue>
 #include <vector>
 #include "Chunk.hpp"
 #include <cmath>
@@ -17,7 +17,6 @@ Terrain::Terrain(int render_dist,int seed){
     world_seed = seed;
     render_distance = render_dist;
     prev_chunk_pos = glm::ivec2(0,0);
-    is_buffer_updated = false;
     vertices = {
         -0.5f, -0.5f, 0.5f,
          0.5f, -0.5f, 0.5f,
@@ -46,8 +45,9 @@ Terrain::Terrain(int render_dist,int seed){
     glEnableVertexAttribArray(0);
 
     glBindBuffer(GL_ARRAY_BUFFER, gpu_mapped_ibo);
-    glBufferStorage(GL_ARRAY_BUFFER, max_chunks * max_instances * sizeof(int), nullptr, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
-    instance_buffer_ptr = (int*)glMapBufferRange(GL_ARRAY_BUFFER, 0, max_chunks * max_instances * sizeof(GLuint), GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
+    int size = (max_chunks * bucket_size1);
+    glBufferStorage(GL_ARRAY_BUFFER,size * sizeof(int), nullptr, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
+    instance_buffer_ptr = (int*)glMapBufferRange(GL_ARRAY_BUFFER, 0, size * sizeof(GLuint), GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
     if (!instance_buffer_ptr) {
         std::cerr << "Failed to map instance buffer!" << std::endl;
     }
@@ -68,7 +68,7 @@ Terrain::Terrain(int render_dist,int seed){
     memset(ssbo_ptr, 0, max_chunks * sizeof(glm::vec4));
 
     for(int i = 0; i<max_chunks; i++){
-        free_offsets.push(i);
+        free_offsets1.push(i);
     }
 
     glBindVertexArray(0);
@@ -86,7 +86,6 @@ bool Terrain::init_world_chunks(glm::vec3 cam_pos){
         return false;
     }
 
-    std::lock_guard<std::mutex> lock(buffer_mutex);
 
     // Remove out-of-range chunks
     for (auto it = chunks_data.begin(); it != chunks_data.end();) {
@@ -100,7 +99,7 @@ bool Terrain::init_world_chunks(glm::vec3 cam_pos){
             // Mark buffers as unused
             ssbo_ptr[offset] = glm::vec4(0.0f);
             draw_command_ptr[offset].instanceCount = 0;
-            free_offsets.push(offset);
+            free_offsets1.push(offset);
 
             // Cleanup
             delete it->second;
@@ -118,33 +117,28 @@ bool Terrain::init_world_chunks(glm::vec3 cam_pos){
         for (int z = z_chunk - render_distance; z <= z_chunk + render_distance; ++z) {
             for (int y = 0; y < 8; ++y) {
                 glm::ivec3 pos(x, y, z);
-                if (chunks_data.find(pos) != chunks_data.end())
-                    continue;
-
-                if (free_offsets.empty()) {
-                    std::cerr << "No free chunk slots available!" << std::endl;
-                    continue;
-                }
-
-                unsigned int offset = free_offsets.front();
-                free_offsets.pop();
+                if (chunks_data.find(pos) != chunks_data.end()) continue;
 
                 // Initialize chunk
                 Chunk* chunk = new Chunk(pos);
                 chunk->gen_chunk_data(world_seed);
-                chunk->cull_face(instance_buffer_ptr + offset * max_instances);
-                {
-                    if(chunk->instance_count > largest_instance){
-                        largest_instance = chunk->instance_count;
-                    }
+                //chunk->cull_face(instance_buffer_ptr + offset * bucket_size1);
+
+                if(free_offsets1.empty()){
+                    std::cerr << "No empty buckets found!!" << std::endl;
+                    continue;
                 }
+                unsigned int offset = free_offsets1.front();
+                free_offsets1.pop();
+                chunk->cull_face(instance_buffer_ptr + offset * bucket_size1);
+
                 // Update buffers
                 ssbo_ptr[offset] = glm::vec4(pos.x, pos.y, pos.z, 0);
                 draw_command_ptr[offset] = {
                     4, // Vertices per instance
                     chunk->instance_count,
                     0, // First vertex
-                    offset * max_instances
+                    offset * bucket_size1
                 };
 
                 chunks_data[pos] = chunk;

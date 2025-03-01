@@ -3,44 +3,42 @@ project(voxel_lab)
 
 # Add GLFW3
 #find_package(glfw3 3.4 REQUIRED)
-add_subdirectory(libs/glfw)
+add_subdirectory(external/glfw)
 
 # Add OpenGL
 find_package(OpenGL REQUIRED)
 
 # Add GLAD library
-add_library(glad SHARED libs/glad/src/glad.c)
-target_include_directories(glad PUBLIC libs/glad/include)
-
-#Add Imgui library
-add_library(imgui SHARED libs/imgui/imgui.cpp libs/imgui/imgui_impl_glfw.cpp libs/imgui/imgui_impl_opengl3.cpp libs/imgui/imgui_draw.cpp libs/imgui/imgui_widgets.cpp libs/imgui/imgui_tables.cpp libs/imgui/imgui_demo.cpp)
-target_include_directories(imgui PUBLIC libs/imgui)
-target_link_libraries(imgui PUBLIC OpenGL::GL glfw)
-
-# Add stb_image library
-add_library(image SHARED libs/stb_image.c)
-target_include_directories(image PUBLIC libs)
-
-# Add shader library
-add_library(shader SHARED libs/shader.cpp)
-target_include_directories(shader PUBLIC libs)
-target_link_libraries(shader glad)
-
-# Add chunk library
-add_library(chunk SHARED libs/Chunk.cpp)
-target_include_directories(chunk PUBLIC libs)
-target_link_libraries(chunk glad)
-
-# Add terrain library
-add_library(terrain SHARED libs/Terrain.cpp)
-target_include_directories(terrain PUBLIC libs)
-target_link_libraries(terrain chunk glad)
+add_library(glad SHARED external/glad/src/glad.c)
+target_include_directories(glad PUBLIC external/glad/include)
 
 # Add GLM library manually
-add_library(glm INTERFACE)
-set(GLM_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/libs/glm")
-target_include_directories(glm INTERFACE ${GLM_INCLUDE_DIR})
+add_subdirectory(external/glm)
 
+# Add Imgui library
+file(GLOB IMGUI_SOURCES external/imgui/*.cpp)
+add_library(imgui SHARED ${IMGUI_SOURCES})
+target_include_directories(imgui PUBLIC external/imgui)
+target_link_libraries(imgui PUBLIC OpenGL::GL glfw)
+
+# Set common include directory for all libraries
+set(LIBS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libs)
+
+# Add libraries with consistent pattern
+add_library(image SHARED ${LIBS_DIR}/stb_image.c)
+add_library(shader SHARED ${LIBS_DIR}/shader.cpp)
+add_library(chunk SHARED ${LIBS_DIR}/Chunk.cpp)
+add_library(terrain SHARED ${LIBS_DIR}/Terrain.cpp)
+
+# Set common include directory for all libraries
+foreach(lib image shader chunk terrain)
+    target_include_directories(${lib} PUBLIC ${LIBS_DIR})
+endforeach()
+
+# Set dependencies
+target_link_libraries(shader PUBLIC glad)
+target_link_libraries(chunk PUBLIC glad)
+target_link_libraries(terrain PUBLIC chunk glad)
 
 # Add the executable
 add_executable(${PROJECT_NAME} main.cpp)

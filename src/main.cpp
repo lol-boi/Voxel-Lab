@@ -1,8 +1,8 @@
-#include "libs/glad/include/glad/glad.h"
+#include "external/glad/include/glad/glad.h"
 #include "libs/Terrain.hpp"
 #include <GL/gl.h>
 #include <GL/glext.h>
-#include "libs/glfw/include/GLFW/glfw3.h"
+#include "external/glfw/include/GLFW/glfw3.h"
 #include "libs/stb_image.h"
 #include <cwchar>
 #include <glm/detail/qualifier.hpp>
@@ -22,9 +22,9 @@
 #include <chrono>
 #include <iostream>
 #include <functional>
-#include "libs/imgui/imgui.h"
-#include "libs/imgui/imgui_impl_glfw.h"
-#include "libs/imgui/imgui_impl_opengl3.h"
+#include "external/imgui/imgui.h"
+#include "external/imgui/imgui_impl_glfw.h"
+#include "external/imgui/imgui_impl_opengl3.h"
 #include <stdio.h>
 
 
@@ -80,7 +80,7 @@ int main(){
     shader_program.set_int("texture2", 1);
 
 
-    Terrain terrain = Terrain(12,123);
+    Terrain terrain = Terrain(3,123);
     camera.Position = glm::vec3(32*10,255,32*10);
 
     terrain.init_world_chunks(camera.Position);
@@ -139,7 +139,7 @@ int main(){
         glBindTexture(GL_TEXTURE_2D, texture2);
 
         shader_program.use();
-        shader_program.set_int("max_instances", terrain.max_instances);
+        //shader_program.set_int("max_instances", terrain.max_instances);
 
         glm::mat4 model = glm::mat4(1.0f);
         unsigned int model_loc = glGetUniformLocation(shader_program.ID, "model");
@@ -169,7 +169,7 @@ int main(){
         }
     }
     //deallocation of buffers
-
+    ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
     //terminate
