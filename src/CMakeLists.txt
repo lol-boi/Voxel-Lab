@@ -29,6 +29,7 @@ add_executable(${PROJECT_NAME}
     terrain/Chunk.cpp
     graphics/stb_image.c  # Add STB implementation
     ui/DebugUI.cpp
+    util/Tick.cpp
     util/FrameTimer.cpp
 )
 
