@@ -1,48 +1,59 @@
 cmake_minimum_required(VERSION 3.29)
 project(voxel_lab)
 
-# Add GLFW3
-#find_package(glfw3 3.4 REQUIRED)
-add_subdirectory(external/glfw)
+# Set C++ standard
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Add OpenGL
+# Find OpenGL
 find_package(OpenGL REQUIRED)
 
-# Add GLAD library
-add_library(glad SHARED external/glad/src/glad.c)
+# Add dependencies
+add_subdirectory(external/glfw)
+add_subdirectory(external/glm)
+add_subdirectory(external/imgui)
+
+# GLAD configuration
+add_library(glad external/glad/src/glad.c)
 target_include_directories(glad PUBLIC external/glad/include)
 
-# Add GLM library manually
-add_subdirectory(external/glm)
+# Main executable with all sources
+add_executable(${PROJECT_NAME}
+    main.cpp
+    core/Application.cpp
+    core/InputHandler.cpp
+    graphics/Shader.cpp
+    graphics/Texture.cpp
+    graphics/Renderer.cpp
+    terrain/Terrain.cpp
+    terrain/Chunk.cpp
+    graphics/stb_image.c  # Add STB implementation
+    ui/DebugUI.cpp
+    util/FrameTimer.cpp
+)
 
-# Add Imgui library
-file(GLOB IMGUI_SOURCES external/imgui/*.cpp)
-add_library(imgui SHARED ${IMGUI_SOURCES})
-target_include_directories(imgui PUBLIC external/imgui)
-target_link_libraries(imgui PUBLIC OpenGL::GL glfw)
+# Compiler definitions
+target_compile_definitions(${PROJECT_NAME} PRIVATE GLFW_INCLUDE_NONE)
 
-# Set common include directory for all libraries
-set(LIBS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libs)
+# Link libraries
+target_link_libraries(${PROJECT_NAME} PRIVATE
+    glad
+    glfw
+    imgui
+    OpenGL::GL
+    # Add system libraries if needed
+    ${CMAKE_DL_LIBS}
+    pthread
+)
 
-# Add libraries with consistent pattern
-add_library(image SHARED ${LIBS_DIR}/stb_image.c)
-add_library(shader SHARED ${LIBS_DIR}/shader.cpp)
-add_library(chunk SHARED ${LIBS_DIR}/Chunk.cpp)
-add_library(terrain SHARED ${LIBS_DIR}/Terrain.cpp)
-add_library(renderer SHARED ${LIBS_DIR}/Renderer.cpp)
-
-# Set common include directory for all libraries
-foreach(lib image shader renderer chunk terrain )
-    target_include_directories(${lib} PUBLIC ${LIBS_DIR})
-endforeach()
-
-# Set dependencies
-target_link_libraries(shader PUBLIC glad)
-target_link_libraries(chunk PUBLIC glad)
-target_link_libraries(terrain PUBLIC renderer chunk glad)
-
-# Add the executable
-add_executable(${PROJECT_NAME} main.cpp)
-
-# Link the libraries
-target_link_libraries(${PROJECT_NAME} terrain shader image glad OpenGL::GL glfw glm imgui )
+# Include directories
+target_include_directories(${PROJECT_NAME} PRIVATE
+    core/
+    graphics/
+    terrain/
+    ui/
+    util/
+    external/imgui
+    external/glad/include
+    external/stb  # If stb_image.h is in a subdirectory
+)
