@@ -1,9 +1,11 @@
+#include "core/InputHandler.hpp"
 #include "external/glad/include/glad/glad.h"
-#include "libs/Terrain.hpp"
+#include "terrain/Terrain.hpp"
 #include <GL/gl.h>
 #include <GL/glext.h>
 #include "external/glfw/include/GLFW/glfw3.h"
-#include "libs/stb_image.h"
+#include "graphics/stb_image.h"
+#include <GLFW/glfw3.h>
 #include <atomic>
 #include <cwchar>
 #include <glm/detail/qualifier.hpp>
@@ -15,36 +17,28 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include "libs/camera.h"
-#include "libs/shader.hpp"
+#include "util/Camera.hpp"
+#include "graphics/Shader.hpp"
+#include "graphics/Texture.hpp"
 #include <glm/trigonometric.hpp>
-#include <mutex>
 #include <thread>
 #include <chrono>
 #include <iostream>
 #include <functional>
 #include "external/imgui/imgui.h"
-#include "external/imgui/imgui_impl_glfw.h"
-#include "external/imgui/imgui_impl_opengl3.h"
-#include <stdio.h>
+#include "util/Config.hpp"
+#include "util/FrameTimer.hpp"
 
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
-void process_input(GLFWwindow* window, float input_debug);
-void mouse_callback(GLFWwindow* window, double xpos, double ypos);
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
-unsigned int compile_shader(unsigned int, const std::string&);
-static unsigned int create_shader(const std::string&, const std::string&);
+void handle_mouse_input(double xpos, double ypos);
 void thread_function(Terrain &);
+void setup_callbacks(GLFWwindow*);
 GLFWwindow* init_glfw();
-unsigned int set_texture(const char * path, float rgba);
-void set_polygon_mode();
+void cleanup(GLFWwindow *);
 
 
-const unsigned int SCR_WIDTH = 1500;
-const unsigned int SCR_HEIGHT = 900;
-const float FPS_CAP = 60.0f;
-const float FRAME_DURATION = 1.0f / FPS_CAP;
+const float FRAME_DURATION = 1.0f / Config::FPS_CAP;
 
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
@@ -58,299 +52,159 @@ ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
 //camera
 Camera camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,1.0f,0.0f), -90.0f, 10.0f);
-float lastX = SCR_WIDTH / 2.0f;
-float lastY = SCR_HEIGHT/ 2.0f;
-bool firstMouse = true;
+FrameTimer frame_timer;
 
-bool render_toggle = true;  // Controls chunk rendering
-std::mutex toggle_mutex;    // Mutex for thread safety
+
 
 int main(){
 
     auto window = init_glfw();
 
     Shader shader_program("../../src/libs/vs.glsl","../../src/libs/fs.glsl");
-    const char*  texture_path1 = "../../src/res/awesomeface.png";
-    const char* texture_path2 = "../../src/res/atlas1.png";
-    unsigned int texture1, texture2;
-    texture1 = set_texture(texture_path1,true);
-    texture2 = set_texture(texture_path2,true);
     shader_program.use();
+    Texture texture1("../../src/res/awesomeface.png", true);
+    Texture texture2("../../src/res/atlas1.png", true);
     shader_program.set_int("texture1", 0);
     shader_program.set_int("texture2", 1);
 
 
-    Terrain terrain = Terrain(3,123);
-    camera.Position = glm::vec3(32*10,255,32*10);
+    Terrain terrain = Terrain(12,123);
+    camera.Position = glm::vec3(Config::INIT_CAM_POS);
     terrain.init_world_chunks(camera.Position);
 
     std::thread tick(thread_function,std::ref(terrain));
     tick.detach();
 
-    ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-    ImGui::StyleColorsDark();
-
-   // Setup Platform/Renderer backends
-    ImGui_ImplGlfw_InitForOpenGL(window, true);
-    ImGui_ImplOpenGL3_Init();
     while(!glfwWindowShouldClose(window)){
         //event/input handeling
-        float currentFrame = static_cast<float>(glfwGetTime());
-        deltaTime = currentFrame - lastFrame;
-        lastFrame = currentFrame;
+        frame_timer.start_frame();
+        InputHandler::poll(window,camera,frame_timer.delta());
 
-        process_input(window,false);
-
-        //rendering__________________________________
-
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
+        //render_scene__________________________________
         {
-            static float f = 0.0f;
-            static int counter = 0;
+            glClearColor(0.678f,0.847f,0.902f,0.4f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            ImGui::Begin("Debug Window");                          // Create a window called "Hello, world!" and append into it.
-            glm::vec3 pos = camera.Position;
-            ImGui::Text("Current chunk positon: [%.0f, %.f, %.f]", pos.x/32, pos.y/32, pos.z/32);            // Display some text (you can use a format strings too)
-            ImGui::Text("Current camera positon: [%.1f, %.1f, %.1f]",camera.Position.x, camera.Position.y, camera.Position.z);               // Display some text (you can use a format strings too)
-            ImGui::Text("Current rendered chunks: %d ",terrain.render_distance);
-            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
-            bool local_render_toggle;
-            {
-                std::lock_guard<std::mutex> lock(toggle_mutex);
-                local_render_toggle = render_toggle;
-            }
+            texture1.bind(GL_TEXTURE0);
+            texture2.bind(GL_TEXTURE1);
 
-            ImGui::Text("Chunk Rendering: %s", local_render_toggle ? "ON" : "OFF");
-            ImGui::End();
+            shader_program.use();
+
+            glm::mat4 model = glm::mat4(1.0f);
+            shader_program.set_mat4("model", model);
+
+            glm::mat4 projection = glm::perspective(
+                    glm::radians(camera.Zoom),
+                    (float)Config::SCR_WIDTH / (float)Config::SCR_HEIGHT,
+                    0.1f,
+                    1000.0f
+                );
+            shader_program.set_mat4("projection", projection);
+
+            shader_program.set_mat4("view", camera.GetViewMatrix());
+
+            terrain.draw();
+            glfwSwapBuffers(window);
         }
 
-        glClearColor(0.678f,0.847f,0.902f,0.4f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, texture1);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, texture2);
-
-        shader_program.use();
-        //shader_program.set_int("max_instances", terrain.max_instances);
-
-        glm::mat4 model = glm::mat4(1.0f);
-        unsigned int model_loc = glGetUniformLocation(shader_program.ID, "model");
-        glUniformMatrix4fv(model_loc, 1, GL_FALSE, &model[0][0]);
-
-        glm::mat4 projection = glm::mat4(1.0f);
-        projection = glm::perspective(glm::radians(45.0f),(float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 1000.0f);
-        unsigned int projcetion_loc = glGetUniformLocation(shader_program.ID, "projection");
-        glUniformMatrix4fv(projcetion_loc, 1, GL_FALSE, &projection[0][0]);
-
-
-        glm::mat4 view = camera.GetViewMatrix();
-        view = glm::translate(view, glm::vec3(0.0f, 0.0f, 0.0f));
-        unsigned int view_loc = glGetUniformLocation(shader_program.ID, "view");
-        glUniformMatrix4fv(view_loc, 1, GL_FALSE, &view[0][0]);
-
-
-        terrain.draw();
-
-        ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-        glfwSwapBuffers(window);
+        frame_timer.cap_frame();
         glfwPollEvents();
-        float frameTime = static_cast<float>(glfwGetTime()) - currentFrame;
-        if (frameTime < FRAME_DURATION) {
-            std::this_thread::sleep_for(std::chrono::duration<float>(FRAME_DURATION - frameTime));
-        }
     }
 
     thread_running = false;
-    //deallocation of buffers
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplGlfw_Shutdown();
-    ImGui::DestroyContext();
     //terminate
-
-    glfwDestroyWindow(window);
-    glDeleteTextures(1, &texture1);
-    glDeleteTextures(1, &texture2);
-    glfwTerminate();
+    cleanup(window);
     //tick.join();
     return 0;
 }
 
-void process_input(GLFWwindow *window, float input_dbug) {
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-        glfwSetWindowShouldClose(window, true);
-    }
 
-    float cameraSpeed = static_cast<float>(2.5 * deltaTime);
 
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-        camera.ProcessKeyboard(FORWARD, deltaTime);
-        if (input_dbug)
-            std::cout << "W" << std::endl;
-    }
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-        camera.ProcessKeyboard(BACKWARD, deltaTime);
-        if (input_dbug)
-            std::cout << "S" << std::endl;
-    }
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-        camera.ProcessKeyboard(LEFT, deltaTime);
-        if (input_dbug)
-            std::cout << "A" << std::endl;
-    }
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-        camera.ProcessKeyboard(RIGHT, deltaTime);
-        if (input_dbug)
-            std::cout << "D" << std::endl;
-    }
-    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
-        camera.ProcessKeyboard(UP, deltaTime);
-        if (input_dbug)
-            std::cout << "SPACE" << std::endl;
-    }
-    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
-        camera.ProcessKeyboard(DOWN, deltaTime);
-        if (input_dbug)
-            std::cout << "SHIFT" << std::endl;
-    }
-
-    // Toggle mouse attachment/detachment with the M key
-    static bool mKeyWasPressed = false;
-    if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS) {
-        if (!mKeyWasPressed) {  // If 'M' was just pressed
-            mouseDetached = !mouseDetached;  // Toggle the state
-            if (mouseDetached) {
-                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);  // Detach mouse
-            } else {
-                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);  // Capture mouse
-            }
-        }
-        mKeyWasPressed = true;
-    } else {
-        mKeyWasPressed = false;
-    }
-
-    static bool p_key_pressed = false;
-    if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) {
-        p_key_pressed = true;
-    }
-    if (glfwGetKey(window, GLFW_KEY_P) == GLFW_RELEASE && p_key_pressed) {
-        set_polygon_mode();
-        p_key_pressed = false;
-    }
-
-    static bool r_key_was_pressed = false;
-        if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS) {
-            if (!r_key_was_pressed) {  // Detect key press (not hold)
-                std::lock_guard<std::mutex> lock(toggle_mutex);
-                render_toggle = !render_toggle;  // Toggle state
-            }
-            r_key_was_pressed = true;
-        } else {
-            r_key_was_pressed = false;
-        }
-
-}
-
-void framebuffer_size_callback(GLFWwindow* window, int width, int height){
-       glViewport(0,0,width,height);
-}
-void mouse_callback(GLFWwindow* window, double xposIn, double yposIn){
-    float xpos = static_cast<float>(xposIn);
-    float ypos = static_cast<float>(yposIn);
-
-    if (firstMouse)
-    {
-        lastX = xpos;
-        lastY = ypos;
-        firstMouse = false;
-    }
-
-    float xoffset = xpos - lastX;
-    float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
-
-    lastX = xpos;
-    lastY = ypos;
-
-    camera.ProcessMouseMovement(xoffset, yoffset);
-}
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset){
-    camera.ProcessMouseScroll(static_cast<float>(yoffset));
-}
 GLFWwindow* init_glfw(){
-    glfwInit();
+    if(!glfwInit()) {
+            throw std::runtime_error("Failed to initialize GLFW");
+    }
+
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     //window is created using glfw and error handling is done
-    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH , SCR_HEIGHT, "VoxelLabs", NULL, NULL);
-    if(window == nullptr){
+    GLFWwindow* window = glfwCreateWindow(
+        Config::SCR_WIDTH ,
+        Config::SCR_HEIGHT,
+        "VoxelLabs", nullptr,
+        nullptr
+    );
+
+    if(!window){
         std::cout << "ERROR WINDOW NOT INIT" << std::endl;
         glfwTerminate();
         return nullptr;
     }
 
     glfwMakeContextCurrent(window);
+    //glfwSetWindowUserPointer(window, this);
+    setup_callbacks(window);
 
-    glfwSetFramebufferSizeCallback(window,framebuffer_size_callback);
-
-    glfwSetCursorPosCallback(window, mouse_callback);
-    glfwSetScrollCallback(window, scroll_callback);
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    //glfwSetFramebufferSizeCallback(window,framebuffer_size_callback);
+    //glfwSetCursorPosCallback(window, mouse_callback);
+    //glfwSetScrollCallback(window, scroll_callback);
+    //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)){
         std::cout << "Failed to initialize GLAD" << std::endl;
         return 0;
     }
     glEnable(GL_DEPTH_TEST);
-    //glEnable(GL_CULL_FACE);
-    //glCullFace(GL_BACK);
-    //glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
+    glViewport(0,0, Config::SCR_WIDTH, Config::SCR_HEIGHT);
+
+    camera.Position = Config::INIT_CAM_POS;
     return window;
 }
-unsigned int set_texture(const char * path, float rgba){
-    unsigned int texture;
-    glGenTextures(1,&texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-    int width, height, nr_channels;
-    stbi_set_flip_vertically_on_load(true);
-    unsigned char* data = stbi_load(path, &width, &height,  &nr_channels, 0);
-    if(data){
-        if(rgba == true)
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-        else
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }
-    else{
-        std::cout << "Error in loading texture " << path << std::endl;
-    }
-    stbi_image_free(data);
-    return texture;
+void cleanup(GLFWwindow* window) {
+    glfwDestroyWindow(window);
+    glfwTerminate();
 }
 
-void set_polygon_mode(){
-    static bool state = 1;
-    state = !state;
-    if(state){
-        glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
-    }else{
-        glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
+void setup_callbacks(GLFWwindow* window){
+    auto resize_callback = [](GLFWwindow* window,int width, int height) {
+        glViewport(0, 0, width, height);
+    };
+
+    auto mouse_callback = [](GLFWwindow* window, double xpos, double ypos) {
+        handle_mouse_input(xpos, ypos);
+    };
+
+    auto scroll_callback = [](GLFWwindow* window, double xoffset, double yoffset) {
+        camera.ProcessMouseScroll(static_cast<float>(yoffset));
+    };
+
+    glfwSetFramebufferSizeCallback(window, resize_callback);
+    glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetScrollCallback(window, scroll_callback);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+}
+
+void handle_mouse_input(double xpos, double ypos){
+    static bool firstMouse = true;
+    static float lastX = Config::SCR_WIDTH / 2.0f;
+    static float lastY = Config::SCR_HEIGHT / 2.0f;
+
+    if(firstMouse) {
+        lastX = xpos;
+        lastY = ypos;
+        firstMouse = false;
     }
+
+    float xoffset = xpos - lastX;
+    float yoffset = lastY - ypos;
+    lastX = xpos;
+    lastY = ypos;
+
+    camera.ProcessMouseMovement(xoffset, yoffset);
 }
 
 void thread_function(Terrain &t) {
@@ -358,13 +212,13 @@ void thread_function(Terrain &t) {
     while (thread_running) {
 
         auto start = std::chrono::steady_clock::now();
-        bool local_toggle;
-        glm::vec3 local_camera_pos;
-        {
-            std::lock_guard<std::mutex> lock(toggle_mutex);
-            local_toggle = render_toggle;
-            local_camera_pos = camera.Position;
-        }
+        bool local_toggle = true;
+        glm::vec3 local_camera_pos = camera.Position;
+        //{
+        //    std::lock_guard<std::mutex> lock(toggle_mutex);
+        //    local_toggle = render_toggle;
+        //    local_camera_pos = camera.Position;
+        //}
         if(local_toggle){
             t.init_world_chunks(local_camera_pos);
         }
