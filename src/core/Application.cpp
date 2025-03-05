@@ -8,18 +8,23 @@
 #include <memory>
 #include <stdexcept>
 #include "../util/Tick.hpp"
-#include <iostream>
+
+
 Application::Application()
 {
-
-    std::cout << "Hellow" << std::endl;
+    //Init glfw context before anything else
     initialize();
-    shader = std::make_unique<Shader>( "../../src/libs/vs.glsl", "../../src/libs/fs.glsl");
+
+    //set shader programs
+    shader = std::make_unique<Shader>( "../../src/shaders/vs.glsl", "../../src/shaders/fs.glsl");
     shader->use();
+
     texture1 = std::make_unique<Texture>("../../src/res/awesomeface.png", true);
     texture2 = std::make_unique<Texture>("../../src/res/atlas1.png", true);
     shader->set_int("texture1", 0);
     shader->set_int("texture2", 1);
+
+    //Init terrain
     terrain = new Terrain(6, 123);
 }
 
@@ -104,6 +109,8 @@ void Application::run() {
 }
 
 void Application::render_scene() {
+
+    //BG color
     glClearColor(0.678f, 0.847f, 0.902f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -111,13 +118,11 @@ void Application::render_scene() {
     texture1->bind(GL_TEXTURE0);
     texture2->bind(GL_TEXTURE1);
 
-    // Activate shader
-    shader->use();
 
     glm::mat4 model = glm::mat4(1.0f);
     shader->set_mat4("model", model);
 
-    // Set projection matrix
+    // Set projection matrices
     glm::mat4 projection = glm::perspective(
         glm::radians(camera.Zoom),
         (float)Config::SCR_WIDTH / (float)Config::SCR_HEIGHT,

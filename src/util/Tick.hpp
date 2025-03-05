@@ -1,7 +1,5 @@
 // Tick.hpp
 #pragma once
-#include <algorithm>
-#include <memory>
 #include <thread>
 #include <atomic>
 #include <glm/glm.hpp>

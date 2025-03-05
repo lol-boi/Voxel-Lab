@@ -54,6 +54,7 @@ Render::Render(int max_chunks, int bucket_size1){
 }
 
 void Render::draw(int max_chunks){
+
     glBindVertexArray(vao);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo);
     glMultiDrawArraysIndirect(GL_TRIANGLE_STRIP, nullptr, max_chunks, 0);

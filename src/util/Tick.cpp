@@ -1,6 +1,5 @@
 #include "Tick.hpp"
 #include <chrono>
-#include <memory>
 
 Tick::Tick(Terrain* terrain)
     : terrain(terrain), running(false) {}
