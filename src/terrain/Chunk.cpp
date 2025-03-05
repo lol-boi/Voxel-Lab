@@ -198,7 +198,7 @@ int Chunk::pack_greedy_quads(int x, int y, int z, int normal, int texture, int h
 }
 
 void Chunk::greedy_mesh(unsigned int* data, int dir, int key,int* instance_data){
-    //
+    //greedy meshing implimentation
     for(int row = 0; row<c_size; row++){
         int y = 0; //at what bit index are we at
         while(y < c_size){
