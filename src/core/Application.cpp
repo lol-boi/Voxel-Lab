@@ -25,7 +25,7 @@ Application::Application()
     shader->set_int("texture2", 1);
 
     //Init terrain
-    terrain = new Terrain(6, 123);
+    terrain = new Terrain(Config::RENDER_DISTANCE, Config::WORLD_SEED);
 }
 
 void Application::initialize() {

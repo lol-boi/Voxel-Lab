@@ -16,8 +16,8 @@ void Chunk::gen_chunk_data(int seed){
     delete [] chunk_data;
     chunk_data = new int[c_size_p*c_size_p*c_size_p]();
 
-    float oct1 = .5f, oct2 = .8f, oct3 = 1.0f;
-    float freq1 = 1.0f, freq2 = 1.25f, freq3  = 1.5f;
+    float oct1 = .88f, oct2 = .5f, oct3 = .22f;
+    float freq1 = .22f, freq2 = .55f, freq3  = .88f;
 
     FastNoiseLite noise(seed);
     noise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
