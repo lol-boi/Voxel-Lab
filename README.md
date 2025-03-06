@@ -20,18 +20,48 @@ This project is a 3D terrain renderer optimized with techniques like face cullin
 ```
 project/
 ├── build/
+│   ├── linux/
+│   ├── win/
 ├── src/
-│   ├── libs/
+│   ├── core/
+│   │   ├── Application.cpp
+│   │   ├── Application.hpp
+│   │   ├── InputHandler.cpp
+│   │   ├── InputHandler.hpp
+│   ├── external/
 │   │   ├── glad/
-│   │   │   ├── include/
-│   │   │   │   └── glad/
-│   │   │   │       └── glad.h
-│   │   │   └── src/
-│   │   │       └── glad.c
-│   │   ├── shader.hpp
-│   │   └── shader.cpp
-│   ├── application.cpp
-│   └── CMakeLists.txt
+│   │   ├── glfw/
+│   │   ├── glm/
+│   │   ├── imgui/
+│   ├── graphics/
+│   │   ├── Renderer.cpp
+│   │   ├── Renderer.hpp
+│   │   ├── Shader.cpp
+│   │   ├── Shader.hpp
+│   │   ├── stb_image.c
+│   │   ├── stb_image.h
+│   │   ├── Texture.cpp
+│   │   ├── Texture.hpp
+│   ├── res/
+│   ├── shaders/
+│   │   ├── fs.glsl
+│   │   ├── vs.glsl
+│   ├── terrain/
+│   │   ├── Chunk.cpp
+│   │   ├── Chunk.hpp
+│   │   ├── FastNoiseLite.h
+│   │   ├── Terrain.cpp
+│   │   ├── Terrain.hpp
+│   ├── util/
+│   │   ├── Camera.hpp
+│   │   ├── Config.hpp
+│   │   ├── FrameTimer.cpp
+│   │   ├── FrameTimer.hpp
+│   │   ├── Tick.cpp
+│   │   ├── Tick.hpp
+│   ├── CMakeLists.txt
+├── .gitignore
+├── README.md
 ```
 
 ## Dependencies
@@ -55,23 +85,23 @@ project/
 2. Clone the repository:
 
    ```sh
-   git clone <repository-url>
-   cd project
+   git clone https://github.com/lol-boi/Voxel-Lab.git
+   cd Voxel-Lab
    ```
 
 3. Build the project:
 
    ```sh
-   mkdir build
-   cd build
-   cmake ..
+   mkdir build/linux
+   cd build/linux
+   cmake ../../src
    make
    ```
 
 4. Run the executable:
 
    ```sh
-   ./voxel_engine
+   ./voxel_lab
    ```
 
 ### Windows
@@ -81,30 +111,30 @@ project/
 2. Clone the repository:
 
    ```sh
-   git clone <repository-url>
-   cd project
+   git clone https://github.com/lol-boi/Voxel-Lab.git
+   cd Voxel-Lab
    ```
 
 3. Build the project:
 
    ```sh
-   mkdir build
-   cd build
-   cmake -G "MinGW Makefiles" ..
+   mkdir build/win
+   cd build/win
+   cmake -G "MinGW Makefiles" ../../src
    mingw32-make
    ```
 
 4. Run the executable:
 
    ```sh
-   ./voxel_engine.exe
+   ./voxel_lab.exe
    ```
 
 ## Usage
 
 1. Execute the binary to start the voxel engine.
 2. Use the WASD keys to navigate through the world.
-3. Press the spacebar to jump and the mouse to look around.
+3. Press the spacebar to go up and the mouse to look around.
 
 
 ## Screenshots
@@ -114,22 +144,7 @@ project/
 ![Screenshot 1](images/screenshot1.png)
 ![Screenshot 2](images/screenshot2.png)
 
-
-
-
-## TODO
-
-- **Complete the rendering using voxel pooling technique**: [High-Performance Voxel Engine](https://nickmcd.me/2021/04/04/high-performance-voxel-engine/).
-  - Handle buckets efficiently(Smaller Fixed sized buckets or even some big size bucketes 2X).
-  - Log chunk Init time.
-  - Maybe chunk loading and Unloading from the Persistant storage.
-- **Improve the texture assets**: Use solid colors instead of textures depending on the world height.
-- **Enhance terrain generation**: Make the terrain generation more robust and feature-packed instead of just bland rendering.
-- **Refactor and optimize**: Once the above tasks are completed, refactor the code, optimize memory usage, and add comments for clarity.
-
-
 ## Acknowledgments
-
 - **GLAD** for OpenGL function loading.
 - **FastNoiseLite** for noise generation.
 - **GLFW** for window and input management.
