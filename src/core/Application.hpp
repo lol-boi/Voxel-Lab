@@ -1,6 +1,6 @@
 #pragma once
 #include "../terrain/Terrain.hpp"
-#include <GLFW/glfw3.h>
+#include "../external/glfw/include/GLFW/glfw3.h"
 #include <memory>
 #include "../graphics/Shader.hpp"
 #include "../util/Camera.hpp"

@@ -32,6 +32,13 @@ void main()
     int height = (packed_instance_data >> 22) & 31;
     int width = (packed_instance_data >> 27) & 31;
 
+    //vertices = {
+    //    -0.5f, -0.5f, 0.5f,
+    //     0.5f, -0.5f, 0.5f,
+    //    -0.5f,  0.5f, 0.5f,
+    //     0.5f,  0.5f, 0.5f
+    //};
+
     vec3 face_pos = vec3(pos_x, pos_y, pos_z);
     vec3 rotated_pos = vertex_pos;
 
@@ -47,6 +54,8 @@ void main()
         else {
             tex_coord.x = .75;
         }
+
+        //scaling the texture according to the given width and height
         if (rotated_pos.x > 0) rotated_pos.x += width;
         if (rotated_pos.y > 0) rotated_pos.y += height;
     } else if (normal == 0) { //back
@@ -57,6 +66,8 @@ void main()
         else {
             tex_coord.x = .75;
         }
+
+        //scaling the texture according to the given width and height
         if (rotated_pos.x > 0) rotated_pos.x += width;
         if (rotated_pos.y > 0) rotated_pos.y += height;
     } else if (normal == 2) { //left
@@ -67,6 +78,8 @@ void main()
         else {
             tex_coord.x = 1;
         }
+
+        //scaling the texture according to the given width and height
         if (rotated_pos.z > 0) rotated_pos.z += width;
         if (rotated_pos.y > 0) rotated_pos.y += height;
     } else if (normal == 3) { //right
@@ -77,6 +90,8 @@ void main()
         else {
             tex_coord.x = 1;
         }
+
+        //scaling the texture according to the given width and height
         if (rotated_pos.z > 0) rotated_pos.z += width;
         if (rotated_pos.y > 0) rotated_pos.y += height;
     } else if (normal == 4) { //bottom
@@ -88,11 +103,14 @@ void main()
             tex_coord.x = .5;
         }
 
+        //scaling the texture according to the given width and height
         if (rotated_pos.z > 0) rotated_pos.z += width;
         if (rotated_pos.x > 0) rotated_pos.x += height;
     } else if (normal == 5) { //top
         rotated_pos = vec3(vertex_pos.x, vertex_pos.z, vertex_pos.y);
         tex_coord.x *= .25;
+
+        //scaling the texture according to the given width and height
         if (rotated_pos.z > 0) rotated_pos.z += width;
         if (rotated_pos.x > 0) rotated_pos.x += height;
     }

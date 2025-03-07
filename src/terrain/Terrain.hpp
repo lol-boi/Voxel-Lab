@@ -1,8 +1,9 @@
 #ifndef  TERRAIN_HPP
 #define TERRAIN_HPP
-
 #include <cmath>
 #include "Chunk.hpp"
+#include "../external/glm/ext/vector_int3.hpp"
+#include "../external/glm/ext/vector_int2.hpp"
 #include "../graphics/Renderer.hpp"
 #include <unordered_map>
 #include <queue>

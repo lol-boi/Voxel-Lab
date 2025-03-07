@@ -1,7 +1,6 @@
 #ifndef CHUNK_HPP
 #define CHUNK_HPP
-#include <glm/detail/qualifier.hpp>
-#include <glm/ext/vector_float3.hpp>
+#include "../external/glm/ext/vector_float3.hpp"
 
 class Chunk {
 

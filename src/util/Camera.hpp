@@ -1,10 +1,10 @@
 #pragma once
 #ifndef CAMERA_HPP
 #define CAMERA_HPP
-
+#include "../external/glm/ext/vector_float3.hpp"
+#include "../external/glm/gtc/matrix_transform.hpp"
+#include "../external/glm/trigonometric.hpp"
 #include "../external/glad/include/glad/glad.h"
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 // Defines several possible options for camera movement. Used as abstraction to stay away from window-system specific input methods
 enum Camera_Movement {
     FORWARD,
@@ -63,7 +63,7 @@ public:
     // returns the view matrix calculated using Euler Angles and the LookAt Matrix
     glm::mat4 GetViewMatrix()
     {
-        return glm::lookAt(Position, Position + Front, Up);
+            return glm::lookAt(Position, Position + Front, Up);
     }
 
     // processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)

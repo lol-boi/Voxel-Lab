@@ -1,6 +1,6 @@
 #include "Shader.hpp"
+#include "../external/glm/gtc/type_ptr.hpp"  // For glm::value_ptr
 #include "../external/glad/include/glad/glad.h"
-#include <glm/gtc/type_ptr.hpp>  // For glm::value_ptr
 #include <string>
 #include <fstream>
 #include <sstream>

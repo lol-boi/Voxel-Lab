@@ -2,8 +2,7 @@
 #include "../graphics/Renderer.hpp"
 #include <cstdlib>
 #include <cwchar>
-#include <glm/ext/vector_int3.hpp>
-#include <glm/glm.hpp>
+#include "../external/glm/ext/vector_int3.hpp"
 #include <queue>
 #include "Chunk.hpp"
 #include <cmath>

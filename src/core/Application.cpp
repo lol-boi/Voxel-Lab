@@ -3,7 +3,6 @@
 #include "../util/FrameTimer.hpp"
 #include "../util/Config.hpp"
 #include "InputHandler.hpp"  // Add this include
-#include <glm/gtc/type_ptr.hpp>  // For glm::value_ptr
 #include <GLFW/glfw3.h>
 #include <memory>
 #include <stdexcept>

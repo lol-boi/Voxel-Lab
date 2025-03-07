@@ -1,7 +1,5 @@
 #include "Chunk.hpp"
 #include "FastNoiseLite.h"
-#include <bits/types/clockid_t.h>
-#include <glm/ext/vector_float3.hpp>
 #include <cstdint>
 #include <array>
 #include <unordered_map>

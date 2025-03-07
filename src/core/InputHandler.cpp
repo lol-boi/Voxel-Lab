@@ -1,5 +1,5 @@
 #include "InputHandler.hpp"
-#include <GLFW/glfw3.h>
+#include "../external/glfw/include/GLFW/glfw3.h"
 #include "../util/Camera.hpp"
 
 bool InputHandler::mouse_detached = false;
@@ -48,10 +48,10 @@ void InputHandler::poll(GLFWwindow* window, Camera& camera, float deltaTime) {
     if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) {
         p_key_pressed = true;
     }
-    //if (glfwGetKey(window, GLFW_KEY_P) == GLFW_RELEASE && p_key_pressed) {
-    //    set_polygon_mode();
-    //    p_key_pressed = false;
-    //}
+    if (glfwGetKey(window, GLFW_KEY_P) == GLFW_RELEASE && p_key_pressed) {
+        set_polygon_mode();
+        p_key_pressed = false;
+    }
 
     static bool r_key_was_pressed = false;
     if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS) {
@@ -61,5 +61,15 @@ void InputHandler::poll(GLFWwindow* window, Camera& camera, float deltaTime) {
         r_key_was_pressed = true;
     } else {
         r_key_was_pressed = false;
+    }
+}
+
+void InputHandler::set_polygon_mode(){
+    static bool state = true;
+    state = !state;
+    if(state){
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    }else{
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     }
 }

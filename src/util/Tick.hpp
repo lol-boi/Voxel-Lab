@@ -2,7 +2,7 @@
 #pragma once
 #include <thread>
 #include <atomic>
-#include <glm/glm.hpp>
+#include "../external/glm/detail/setup.hpp"
 #include "../terrain/Terrain.hpp"
 
 class Tick {
