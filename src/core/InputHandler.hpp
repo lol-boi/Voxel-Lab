@@ -1,6 +1,6 @@
 #pragma once
 #include "../util/Camera.hpp"
-#include <GLFW/glfw3.h>
+#include "../external/glfw/include/GLFW/glfw3.h"
 
 class InputHandler {
     public:
@@ -8,4 +8,5 @@ class InputHandler {
     private:
         static bool mouse_detached;
         static bool render_toggle;
+        static void set_polygon_mode();
 };

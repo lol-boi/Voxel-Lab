@@ -1,7 +1,7 @@
 #ifndef SHADER_H
 #define SHADER_H
 #include <string>
-#include <glm/glm.hpp>
+#include "../external/glm/ext/matrix_float4x4.hpp"
 
 class Shader {
     public:

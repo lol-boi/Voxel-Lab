@@ -1,8 +1,8 @@
 #ifndef  RENDERER_HPP
 #define  RENDERER_HPP
-
+#include "../external/glm/ext/vector_float4.hpp"
 #include "../external/glad/include/glad/glad.h"
-#include <glm/glm.hpp>
+
 #include <vector>
 
 struct DrawArraysIndirectCommand {
