@@ -1,11 +1,11 @@
 #include "Application.hpp"
-#include "../ui/DebugUI.hpp"
 #include "../util/FrameTimer.hpp"
 #include "../util/Config.hpp"
 #include "InputHandler.hpp"  // Add this include
-#include <GLFW/glfw3.h>
+#include "../external/glfw/include/GLFW/glfw3.h"
 #include <memory>
 #include <stdexcept>
+#include <iostream>
 #include "../util/Tick.hpp"
 
 
@@ -18,10 +18,9 @@ Application::Application()
     shader = std::make_unique<Shader>( "../../src/shaders/vs.glsl", "../../src/shaders/fs.glsl");
     shader->use();
 
-    texture1 = std::make_unique<Texture>("../../src/res/awesomeface.png", true);
-    texture2 = std::make_unique<Texture>("../../src/res/atlas1.png", true);
-    shader->set_int("texture1", 0);
-    shader->set_int("texture2", 1);
+    texture_array = std::make_unique<Texture>("../../src/res", true);
+    shader->set_int("texture_array", 0);
+    std::cout << "HELLO" << std::endl;
 
     //Init terrain
     terrain = new Terrain(Config::RENDER_DISTANCE, Config::WORLD_SEED);
@@ -114,8 +113,7 @@ void Application::render_scene() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Bind texture1s
-    texture1->bind(GL_TEXTURE0);
-    texture2->bind(GL_TEXTURE1);
+    texture_array->bind(GL_TEXTURE0);
 
 
     glm::mat4 model = glm::mat4(1.0f);

@@ -7,6 +7,7 @@ layout(std430, binding = 0) buffer ChunkPositions {
 };
 
 out vec2 tex_coord;
+flat out int texture_index;
 
 uniform int max_instances;
 uniform mat4 model;
@@ -32,6 +33,8 @@ void main()
     int height = (packed_instance_data >> 22) & 31;
     int width = (packed_instance_data >> 27) & 31;
 
+    texture_index = texture;
+
     //vertices = {
     //    -0.5f, -0.5f, 0.5f,
     //     0.5f, -0.5f, 0.5f,
@@ -42,78 +45,49 @@ void main()
     vec3 face_pos = vec3(pos_x, pos_y, pos_z);
     vec3 rotated_pos = vertex_pos;
 
-    tex_coord = vec2(vertex_pos.x, vertex_pos.y) + vec2(0.5, 0.5);
-    tex_coord.y = ((texture - 1) + tex_coord.y) * .0625; //calculating v coordinates
+    tex_coord = (vec2(vertex_pos.x, vertex_pos.y) + vec2(0.5)) * vec2(height+1, width+1);
 
     //roating the base face model/mesh and also calcluateing v coordinates
     if (normal == 1) { //front this is like this maybe cause the +z and -z normalisation is diferent in opengl as to the
         rotated_pos = vertex_pos;
-        if (tex_coord.x == 0) {
-            tex_coord.x = .5;
-        }
-        else {
-            tex_coord.x = .75;
-        }
 
-        //scaling the texture according to the given width and height
+        tex_coord = (vec2(vertex_pos.x, vertex_pos.y) + vec2(0.5)) * vec2(width+1, height+1);
+
         if (rotated_pos.x > 0) rotated_pos.x += width;
         if (rotated_pos.y > 0) rotated_pos.y += height;
     } else if (normal == 0) { //back
         rotated_pos = vec3(vertex_pos.x, vertex_pos.y, -vertex_pos.z);
-        if (tex_coord.x == 0) {
-            tex_coord.x = .5;
-        }
-        else {
-            tex_coord.x = .75;
-        }
 
-        //scaling the texture according to the given width and height
+        tex_coord = (vec2(vertex_pos.x, vertex_pos.y) + vec2(0.5)) * vec2(width+1, height+1);
+
         if (rotated_pos.x > 0) rotated_pos.x += width;
         if (rotated_pos.y > 0) rotated_pos.y += height;
     } else if (normal == 2) { //left
         rotated_pos = vec3(-vertex_pos.z, vertex_pos.y, -vertex_pos.x);
-        if (tex_coord.x == 0) {
-            tex_coord.x = .75;
-        }
-        else {
-            tex_coord.x = 1;
-        }
 
-        //scaling the texture according to the given width and height
+        tex_coord = (vec2(vertex_pos.x, vertex_pos.y) + vec2(0.5)) * vec2(width+1, height+1);
+
         if (rotated_pos.z > 0) rotated_pos.z += width;
         if (rotated_pos.y > 0) rotated_pos.y += height;
     } else if (normal == 3) { //right
         rotated_pos = vec3(vertex_pos.z, vertex_pos.y, -vertex_pos.x);
-        if (tex_coord.x == 0) {
-            tex_coord.x = .75;
-        }
-        else {
-            tex_coord.x = 1;
-        }
 
-        //scaling the texture according to the given width and height
+        tex_coord = (vec2(vertex_pos.x, vertex_pos.y) + vec2(0.5)) * vec2(width+1, height+1);
+
         if (rotated_pos.z > 0) rotated_pos.z += width;
         if (rotated_pos.y > 0) rotated_pos.y += height;
     } else if (normal == 4) { //bottom
         rotated_pos = vec3(vertex_pos.x, -vertex_pos.z, -vertex_pos.y);
-        if (tex_coord.x == 0) {
-            tex_coord.x = .25;
-        }
-        else {
-            tex_coord.x = .5;
-        }
 
-        //scaling the texture according to the given width and height
         if (rotated_pos.z > 0) rotated_pos.z += width;
         if (rotated_pos.x > 0) rotated_pos.x += height;
     } else if (normal == 5) { //top
         rotated_pos = vec3(vertex_pos.x, vertex_pos.z, vertex_pos.y);
-        tex_coord.x *= .25;
 
-        //scaling the texture according to the given width and height
         if (rotated_pos.z > 0) rotated_pos.z += width;
         if (rotated_pos.x > 0) rotated_pos.x += height;
     }
+
     vec3 final_pos = face_pos + rotated_pos;
 
     gl_Position = projection * view * model * vec4(final_pos, 1.0);

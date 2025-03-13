@@ -23,6 +23,5 @@ private:
     std::unique_ptr<Shader> shader;
     Terrain* terrain;
     Camera camera;
-    std::unique_ptr<Texture> texture1;
-    std::unique_ptr<Texture> texture2;
+    std::unique_ptr<Texture> texture_array;
 };
