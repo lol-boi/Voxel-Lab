@@ -10,5 +10,5 @@ public:
 
 private:
     GLuint m_id;
-    void load_from_file(const std::string& path, bool useRGBA);
+    void load_textures_from_files(const std::string& folder_path, bool useRGBA);
 };
