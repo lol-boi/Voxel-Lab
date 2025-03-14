@@ -82,11 +82,20 @@ void Application::run() {
     //}
 
     while(!glfwWindowShouldClose(window)) {
-        game_tick.updateCameraPosition(camera.Position);
         frame_timer.start_frame();
 
         // Update phase
-        InputHandler::poll(window, camera, frame_timer.delta());
+        glfwPollEvents();
+        {
+            static glm::vec3 old_pos = camera.Position;
+            if(InputHandler::render_toggle){
+                old_pos = camera.Position;
+                game_tick.updateCameraPosition(camera.Position);
+            }else{
+                game_tick.updateCameraPosition(old_pos);
+            }
+            InputHandler::poll(window, camera, frame_timer.delta());
+        }
 
         // Render phase
         render_scene();
@@ -98,7 +107,6 @@ void Application::run() {
 
         // Frame timing
         frame_timer.cap_frame();
-        glfwPollEvents();
     }
     game_tick.stop();
 

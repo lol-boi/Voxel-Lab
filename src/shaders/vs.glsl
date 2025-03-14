@@ -34,6 +34,13 @@ void main()
     int width = (packed_instance_data >> 27) & 31;
 
     texture_index = texture;
+        if(texture == 1 ){
+            if(normal == 5){ //top
+                texture_index = 2;
+            }else{
+                texture_index = 4;
+            }
+        }
 
     //vertices = {
     //    -0.5f, -0.5f, 0.5f,

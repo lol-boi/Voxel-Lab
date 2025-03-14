@@ -17,7 +17,6 @@ Texture::~Texture() {
 void Texture::bind(GLenum unit) const {
     glActiveTexture(unit);
     glBindTexture(GL_TEXTURE_2D_ARRAY, m_id);
-    std::cout << "Exit bind!" << std::endl;
 }
 
 void Texture::load_textures_from_files(const std::string& folder_path, bool useRGBA) {
