@@ -204,7 +204,7 @@ void Chunk::greedy_mesh(unsigned int* data, int dir, int key,int* instance_data)
             if(y >= c_size) continue;
             int height = __builtin_ctz( ~(data[row] >> y));
             int h_mask;
-            if(height == c_size) h_mask = INT_MAX;
+            if(height == c_size) h_mask = 0xFFFFFFFF;
             else h_mask = ((1u << height) - 1);
             int mask = h_mask << y;
             int width = 1;
