@@ -12,11 +12,13 @@ Chunk::Chunk(glm::vec3 pos) : chunk_data(nullptr) {
 }
 
 
-//void Chunk::gen_noise_e(int x, int y){
-//    FastNoiseLite noise(Config::WORLD_SEED);
-//    noise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
-//}
-void Chunk::gen_noise_m(int x,int y){}
+inline float Chunk::gen_noise_e(int x, int y){
+    return Terrain_Config::gen_e.GetNoise((float)x,(float)y)/2 + 0.5f;
+}
+
+inline float Chunk::gen_noise_m(int x,int y){
+    return Terrain_Config::gen_m.GetNoise((float)x,(float)y)/2 + 0.5f;
+}
 
 void Chunk::gen_chunk_data(){
 
@@ -31,34 +33,58 @@ void Chunk::gen_chunk_data(){
 
     for(int x = 0; x<c_size_p; x++){
         for(int z = 0; z<c_size_p;  z++){
+           int X = (chunk_pos_in_world.x * c_size) + x - 1;
+           int Y = (chunk_pos_in_world.z * c_size) + z - 1;
 
-           int a,b;
-           a = (chunk_pos_in_world.x * c_size) + x - 1;
-           b = (chunk_pos_in_world.z * c_size) + z - 1;
+            float elevation =(
+                Terrain_Config::Elevation1 * gen_noise_e(1*X,  1*Y) +
+                Terrain_Config::Elevation2 * gen_noise_e(2*X,  2*Y) +
+                Terrain_Config::Elevation3 * gen_noise_e(4*X,  4*Y) +
+                Terrain_Config::Elevation4 * gen_noise_e(8*X,  8*Y) +
+                Terrain_Config::Elevation5 * gen_noise_e(16*X, 16*Y) +
+                Terrain_Config::Elevation6 * gen_noise_e(32*X, 32*Y)
+            );
+            elevation = elevation /(Terrain_Config::Elevation1+
+                 Terrain_Config::Elevation2+
+                 Terrain_Config::Elevation3+
+                 Terrain_Config::Elevation4+
+                 Terrain_Config::Elevation5+
+                 Terrain_Config::Elevation6);
+            elevation = std::pow(elevation,Terrain_Config::Exp);
+            elevation = (int) ((elevation+1) * 256/2);
 
-            float height =
-                  oct1 * noise.GetNoise(freq1*(float)a,freq1*(float)b) +
-                    oct2 * noise.GetNoise(freq2*(float)a,freq2*(float)b) +
-                    oct3 * noise.GetNoise(freq3*(float)a,freq3*(float)b);
 
-             height = height /(oct1 + oct2 + oct3);
-             height = (int) ((height+1) * 256/2);
-            if(height < 60) height  = 60;
+            //float moisture =(
+            //    Terrain_Config::Moisture1 * gen_noise_m(1*X,  1*Y) +
+            //    Terrain_Config::Moisture2 * gen_noise_m(2*X,  2*Y) +
+            //    Terrain_Config::Moisture3 * gen_noise_m(4*X,  4*Y) +
+            //    Terrain_Config::Moisture4 * gen_noise_m(8*X,  8*Y) +
+            //    Terrain_Config::Moisture5 * gen_noise_m(16*X, 16*Y) +
+            //    Terrain_Config::Moisture6 * gen_noise_m(32*X, 32*Y)
+            //);
+            //moisture = moisture/(
+            //    Terrain_Config::Moisture1+
+            //    Terrain_Config::Moisture2+
+            //    Terrain_Config::Moisture3+
+            //    Terrain_Config::Moisture4+
+            //    Terrain_Config::Moisture5+
+            //    Terrain_Config::Moisture6);
+
 
             for(int y = 0; y<c_size_p; y++){
                 int world_y = (c_size * chunk_pos_in_world.y) + y;
                 int index = (c_size_p * c_size_p * y) + (c_size_p * z) + x;
                 //int index = (c_size * c_size * (y-(c_size * chunk_pos_in_world.y))) + (c_size * z) + x;
-                if (height >= world_y) {
+                if (elevation >= world_y) {
                     if (world_y == 0) {
                         chunk_data[index] = 0;
                     } else if(world_y == 1){
                         chunk_data[index] = 4; //
-                    } else if (world_y == height) {
+                    } else if (world_y == elevation) {
                         chunk_data[index] = 1; // grass
-                    } else if (world_y < height && world_y >= height - 4) {
+                    } else if (world_y < elevation && world_y >= elevation - 4) {
                         chunk_data[index] = 3; // dirt
-                    } else if (world_y < height - 4) {
+                    } else if (world_y < elevation - 4) {
                         chunk_data[index] = 5; // stone
                     }
                 } else {
@@ -192,14 +218,14 @@ void Chunk::cull_face(int* instance_data){
 
 
 
-int Chunk::pack_greedy_quads(int x, int y, int z, int normal, int texture, int height, int width){
+int Chunk::pack_greedy_quads(int x, int y, int z, int normal, int texture, int elevation, int width){
     int data = 0;
     data |= (x & 31);               // 5 bits for x (0-31)
     data |= (y & 31) << 5;          // 5 bits for y (0-31)
     data |= (z & 31) << 10;         // 5 bits for z (0-31)
     data |= (normal & 7) << 15;     // 3 bits for normal (0-7) //should be updated when the normal will be send via ssbo
     data |= (texture & 15) << 18;   // 4 bits for texture index (0-15)
-    data |= (height & 31) << 22;    // 5 bits for height of quad
+    data |= (elevation & 31) << 22;    // 5 bits for elevation of quad
     data |= (width & 31) << 27;     // 5 bits for width of quad
     return data;
 }
@@ -211,10 +237,10 @@ void Chunk::greedy_mesh(unsigned int* data, int dir, int key,int* instance_data)
         while(y < c_size){
             y += __builtin_ctz(data[row] >> y);
             if(y >= c_size) continue;
-            int height = __builtin_ctz( ~(data[row] >> y));
+            int elevation = __builtin_ctz( ~(data[row] >> y));
             int h_mask;
-            if(height == c_size) h_mask = 0xFFFFFFFF;
-            else h_mask = ((1u << height) - 1);
+            if(elevation == c_size) h_mask = 0xFFFFFFFF;
+            else h_mask = ((1u << elevation) - 1);
             int mask = h_mask << y;
             int width = 1;
             while(row+width < c_size){
@@ -229,16 +255,16 @@ void Chunk::greedy_mesh(unsigned int* data, int dir, int key,int* instance_data)
             int z = key >> 4;
             int packed_data  =0;
             if(dir /2 == 0){
-                packed_data = (pack_greedy_quads(row, y, z, dir, tex, height-1, width-1));
+                packed_data = (pack_greedy_quads(row, y, z, dir, tex, elevation-1, width-1));
             }
             else if(dir / 2 == 1){
-                packed_data = (pack_greedy_quads(z, y, row, dir, tex, height-1, width-1));
+                packed_data = (pack_greedy_quads(z, y, row, dir, tex, elevation-1, width-1));
             }
             else{
-                packed_data = (pack_greedy_quads(y, z, row, dir, tex, height-1, width-1));
+                packed_data = (pack_greedy_quads(y, z, row, dir, tex, elevation-1, width-1));
             }
             instance_data[instance_count++] = packed_data;
-            y += height;
+            y += elevation;
         }
     }
 }
