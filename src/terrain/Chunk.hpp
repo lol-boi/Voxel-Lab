@@ -22,8 +22,8 @@ class Chunk {
 
         inline int pack_greedy_quads(int,int,int,int,int,int,int);
         void greedy_mesh(unsigned int* ,int,int,int* );
-        void gen_noise_e(int,int);
-        void gen_noise_m(int,int);
+        float gen_noise_e(int,int);
+        float gen_noise_m(int,int);
 };
 
 #endif // CHUNK_HPP
