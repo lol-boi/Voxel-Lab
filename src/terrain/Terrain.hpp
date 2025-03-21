@@ -23,7 +23,7 @@ class Terrain{
     public:
         int render_distance;
 
-        Terrain(int no_of_chunks,int seed);
+        Terrain(int no_of_chunks);
         ~Terrain();
 
         bool init_world_chunks(glm::vec3);

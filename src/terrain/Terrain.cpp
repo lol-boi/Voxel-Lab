@@ -10,9 +10,8 @@
 #include <cstring>
 
 
-Terrain::Terrain(int render_dist,int seed){
+Terrain::Terrain(int render_dist){
     chunk_size = 32;
-    world_seed = seed;
     render_distance = render_dist;
     prev_chunk_pos = glm::ivec2(0,0);
 
@@ -73,7 +72,7 @@ bool Terrain::init_world_chunks(glm::vec3 cam_pos){
                 if (chunks_data.find(pos) != chunks_data.end()) continue; //if chunk is already present in chunks_data skip its initlization
 
                 Chunk* chunk = new Chunk(pos);
-                chunk->gen_chunk_data(world_seed);
+                chunk->gen_chunk_data();
 
                 if(!free_offsets1.empty()){
                     unsigned int offset = free_offsets1.front();
