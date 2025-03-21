@@ -23,7 +23,7 @@ Application::Application()
     std::cout << "HELLO" << std::endl;
 
     //Init terrain
-    terrain = new Terrain(Config::RENDER_DISTANCE, Config::WORLD_SEED);
+    terrain = new Terrain(Config::RENDER_DISTANCE);
 }
 
 void Application::initialize() {

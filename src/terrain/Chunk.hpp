@@ -11,7 +11,7 @@ class Chunk {
         Chunk(glm::vec3);
         ~Chunk();
 
-        void gen_chunk_data(int seed);
+        void gen_chunk_data();
         void cull_face(int *);
 
     private:
@@ -19,8 +19,11 @@ class Chunk {
         const static int c_size = 32;
         const static int c_size_p = 34;
 
+
         inline int pack_greedy_quads(int,int,int,int,int,int,int);
         void greedy_mesh(unsigned int* ,int,int,int* );
+        void gen_noise_e(int,int);
+        void gen_noise_m(int,int);
 };
 
 #endif // CHUNK_HPP

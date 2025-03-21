@@ -1,4 +1,6 @@
 #include "Chunk.hpp"
+#include "terrain_config.hpp"
+#include "../util/Config.hpp"
 #include "FastNoiseLite.h"
 #include <cstdint>
 #include <array>
@@ -9,7 +11,14 @@ Chunk::Chunk(glm::vec3 pos) : chunk_data(nullptr) {
     chunk_pos_in_world = pos;
 }
 
-void Chunk::gen_chunk_data(int seed){
+
+//void Chunk::gen_noise_e(int x, int y){
+//    FastNoiseLite noise(Config::WORLD_SEED);
+//    noise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
+//}
+void Chunk::gen_noise_m(int x,int y){}
+
+void Chunk::gen_chunk_data(){
 
     delete [] chunk_data;
     chunk_data = new int[c_size_p*c_size_p*c_size_p]();
@@ -17,7 +26,7 @@ void Chunk::gen_chunk_data(int seed){
     float oct1 = .88f, oct2 = .5f, oct3 = .22f;
     float freq1 = .22f, freq2 = .55f, freq3  = .88f;
 
-    FastNoiseLite noise(seed);
+    FastNoiseLite noise(Config::WORLD_SEED);
     noise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
 
     for(int x = 0; x<c_size_p; x++){
@@ -50,7 +59,7 @@ void Chunk::gen_chunk_data(int seed){
                     } else if (world_y < height && world_y >= height - 4) {
                         chunk_data[index] = 3; // dirt
                     } else if (world_y < height - 4) {
-                        chunk_data[index] = 2; // stone
+                        chunk_data[index] = 5; // stone
                     }
                 } else {
                     chunk_data[index] = 0; // air
