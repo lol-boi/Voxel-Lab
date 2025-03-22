@@ -51,24 +51,24 @@ void Chunk::gen_chunk_data(){
                  Terrain_Config::Elevation5+
                  Terrain_Config::Elevation6);
             elevation = std::pow(elevation,Terrain_Config::Exp);
-            elevation = (int) ((elevation+1) * 256/2);
+            elevation = (int) ((elevation+.09999f) * 256/2);
 
 
-            //float moisture =(
-            //    Terrain_Config::Moisture1 * gen_noise_m(1*X,  1*Y) +
-            //    Terrain_Config::Moisture2 * gen_noise_m(2*X,  2*Y) +
-            //    Terrain_Config::Moisture3 * gen_noise_m(4*X,  4*Y) +
-            //    Terrain_Config::Moisture4 * gen_noise_m(8*X,  8*Y) +
-            //    Terrain_Config::Moisture5 * gen_noise_m(16*X, 16*Y) +
-            //    Terrain_Config::Moisture6 * gen_noise_m(32*X, 32*Y)
-            //);
-            //moisture = moisture/(
-            //    Terrain_Config::Moisture1+
-            //    Terrain_Config::Moisture2+
-            //    Terrain_Config::Moisture3+
-            //    Terrain_Config::Moisture4+
-            //    Terrain_Config::Moisture5+
-            //    Terrain_Config::Moisture6);
+            float moisture =(
+                Terrain_Config::Moisture1 * gen_noise_m(1*X,  1*Y) +
+                Terrain_Config::Moisture2 * gen_noise_m(2*X,  2*Y) +
+                Terrain_Config::Moisture3 * gen_noise_m(4*X,  4*Y) +
+                Terrain_Config::Moisture4 * gen_noise_m(8*X,  8*Y) +
+                Terrain_Config::Moisture5 * gen_noise_m(16*X, 16*Y) +
+                Terrain_Config::Moisture6 * gen_noise_m(32*X, 32*Y)
+            );
+            moisture = moisture/(
+                Terrain_Config::Moisture1+
+                Terrain_Config::Moisture2+
+                Terrain_Config::Moisture3+
+                Terrain_Config::Moisture4+
+                Terrain_Config::Moisture5+
+                Terrain_Config::Moisture6);
 
 
             for(int y = 0; y<c_size_p; y++){

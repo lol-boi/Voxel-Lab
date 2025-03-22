@@ -117,7 +117,7 @@ void Application::run() {
 void Application::render_scene() {
 
     //BG color
-    glClearColor(0.678f, 0.847f, 0.902f, 1.0f);
+    glClearColor(0.0f, 0.0f, 0.128f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Bind texture1s
