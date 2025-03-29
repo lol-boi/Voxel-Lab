@@ -143,7 +143,3 @@ project/
 
 ![Screenshot 1](images/screenshot1.png)
 ![Screenshot 2](images/screenshot2.png)
-
-## Showcase Video
-
-Check out the project in action: [Voxel Engine Showcase](images/showcase.mp4)
