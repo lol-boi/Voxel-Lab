@@ -33,7 +33,6 @@ void Texture::load_textures_from_files(const std::string& folder_path, bool useR
     }
 
     std::sort(file_paths.begin(), file_paths.end());
-    std::cout << "Count: " << file_paths.size()<< std::endl;
     bool first_image = true;
     for (const auto& texture_path : file_paths) {
         int current_width, current_height;
