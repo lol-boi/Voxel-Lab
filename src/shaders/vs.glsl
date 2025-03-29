@@ -17,8 +17,6 @@ uniform mat4 projection;
 void main()
 {
 
-    //uint chunk_offset = gl_BaseInstance / max_instances;
-    //vec3 chunk_coords = chunk_positions[chunk_offset].xyz;
     vec3 chunk_coords = chunk_positions[gl_DrawID].xyz;
 
     //unpacking the data

@@ -4,11 +4,6 @@
 #include <iostream>
 
 Render::Render(int max_chunks, int bucket_size1){
-    if (GLAD_GL_ARB_gpu_shader_int64) {
-        std::cout << "GL_ARB_gpu_shader_int64 is supported!" << std::endl;
-    } else {
-        std::cout << "GL_ARB_gpu_shader_int64 is NOT supported." << std::endl;
-    }
 
     vertices = {
         -0.5f, -0.5f, 0.5f,

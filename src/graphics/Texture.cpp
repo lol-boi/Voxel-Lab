@@ -64,7 +64,6 @@ void Texture::load_textures_from_files(const std::string& folder_path, bool useR
         texture_data.push_back(data);
     }
 
-    std::cout << "Loaded " << texture_data.size() << " textures" << std::endl;
     // Replace DSA functions with traditional ones
     glBindTexture(GL_TEXTURE_2D_ARRAY, m_id);
     glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_RGBA8, width, height, texture_data.size());

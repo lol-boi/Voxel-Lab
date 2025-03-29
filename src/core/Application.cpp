@@ -5,7 +5,6 @@
 #include "../external/glfw/include/GLFW/glfw3.h"
 #include <memory>
 #include <stdexcept>
-#include <iostream>
 #include "../util/Tick.hpp"
 
 
@@ -20,7 +19,6 @@ Application::Application()
 
     texture_array = std::make_unique<Texture>("../../src/res", true);
     shader->set_int("texture_array", 0);
-    std::cout << "HELLO" << std::endl;
 
     //Init terrain
     terrain = new Terrain(Config::RENDER_DISTANCE);
