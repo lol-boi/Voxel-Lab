@@ -35,6 +35,13 @@ void main()
 
     texture_index = texture;
 
+    if(texture == 1 && normal < 4){
+        if(normal < 4){
+            texture_index = 2;
+        }
+        if(normal == 4) texture_index = 8;
+    }
+
     //vertices = {
     //    -0.5f, -0.5f, 0.5f,
     //     0.5f, -0.5f, 0.5f,

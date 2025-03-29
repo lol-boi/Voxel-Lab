@@ -4,6 +4,12 @@
 #include <iostream>
 
 Render::Render(int max_chunks, int bucket_size1){
+    if (GLAD_GL_ARB_gpu_shader_int64) {
+        std::cout << "GL_ARB_gpu_shader_int64 is supported!" << std::endl;
+    } else {
+        std::cout << "GL_ARB_gpu_shader_int64 is NOT supported." << std::endl;
+    }
+
     vertices = {
         -0.5f, -0.5f, 0.5f,
          0.5f, -0.5f, 0.5f,
@@ -30,7 +36,7 @@ Render::Render(int max_chunks, int bucket_size1){
 
     glBindBuffer(GL_ARRAY_BUFFER, gpu_mapped_ibo);
     int size = (max_chunks * bucket_size1);
-    glBufferStorage(GL_ARRAY_BUFFER,size * sizeof(int), nullptr, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
+    glBufferStorage(GL_ARRAY_BUFFER,size * sizeof(unsigned int), nullptr, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
     instance_buffer_ptr = (int*)glMapBufferRange(GL_ARRAY_BUFFER, 0, size * sizeof(GLuint), GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
     if (!instance_buffer_ptr) {
         std::cerr << "Failed to map instance buffer!" << std::endl;

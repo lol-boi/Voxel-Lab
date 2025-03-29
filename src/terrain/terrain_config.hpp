@@ -20,4 +20,23 @@ namespace Terrain_Config {
     constexpr float Moisture4= 0.73f;
     constexpr float Moisture5= 0.14f;
     constexpr float Moisture6= 0.67f;
+
+    constexpr int AIR = 0;
+    constexpr int GRASS = 1;
+    constexpr int GRASS_SIDE = 2;
+    constexpr int WOOD = 3;
+    constexpr int WOOD_SIDE = 4;
+    //constexpr int
+    //constexpr int
+    constexpr int STONE = 7;
+    constexpr int DIRT = 8;
+    constexpr int LEAVES = 9;
+    constexpr int PLANKS = 10;
+    constexpr int SAND = 11;
+    constexpr int BEDROCK=12;
+    //constexpr int
+    //constexpr int
+    //constexpr int
+
+
 }

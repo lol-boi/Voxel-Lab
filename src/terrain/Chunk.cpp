@@ -53,42 +53,24 @@ void Chunk::gen_chunk_data(){
             elevation = std::pow(elevation,Terrain_Config::Exp);
             elevation = (int) ((elevation+.09999f) * 256/2);
 
-
-            float moisture =(
-                Terrain_Config::Moisture1 * gen_noise_m(1*X,  1*Y) +
-                Terrain_Config::Moisture2 * gen_noise_m(2*X,  2*Y) +
-                Terrain_Config::Moisture3 * gen_noise_m(4*X,  4*Y) +
-                Terrain_Config::Moisture4 * gen_noise_m(8*X,  8*Y) +
-                Terrain_Config::Moisture5 * gen_noise_m(16*X, 16*Y) +
-                Terrain_Config::Moisture6 * gen_noise_m(32*X, 32*Y)
-            );
-            moisture = moisture/(
-                Terrain_Config::Moisture1+
-                Terrain_Config::Moisture2+
-                Terrain_Config::Moisture3+
-                Terrain_Config::Moisture4+
-                Terrain_Config::Moisture5+
-                Terrain_Config::Moisture6);
-
-
             for(int y = 0; y<c_size_p; y++){
                 int world_y = (c_size * chunk_pos_in_world.y) + y;
                 int index = (c_size_p * c_size_p * y) + (c_size_p * z) + x;
-                //int index = (c_size * c_size * (y-(c_size * chunk_pos_in_world.y))) + (c_size * z) + x;
+
                 if (elevation >= world_y) {
                     if (world_y == 0) {
-                        chunk_data[index] = 0;
+                        chunk_data[index] = Terrain_Config::AIR;
                     } else if(world_y == 1){
-                        chunk_data[index] = 4; //
+                        chunk_data[index] = Terrain_Config::BEDROCK;
                     } else if (world_y == elevation) {
-                        chunk_data[index] = 1; // grass
+                        chunk_data[index] = Terrain_Config::GRASS;
                     } else if (world_y < elevation && world_y >= elevation - 4) {
-                        chunk_data[index] = 3; // dirt
+                        chunk_data[index] = Terrain_Config::DIRT;
                     } else if (world_y < elevation - 4) {
-                        chunk_data[index] = 5; // stone
+                        chunk_data[index] = Terrain_Config::STONE;
                     }
                 } else {
-                    chunk_data[index] = 0; // air
+                    chunk_data[index] = Terrain_Config::AIR;
                 }
             }
         }

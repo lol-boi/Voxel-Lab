@@ -70,16 +70,9 @@ void Application::initialize() {
 }
 
 void Application::run() {
-    //DebugUI ui;
     Tick game_tick(terrain);
     game_tick.start();
     FrameTimer frame_timer;
-
-    //try {
-    //    ui.initialize(window);
-    //} catch(const std::exception& e) {
-    //    std::cerr << "UI initialization failed: " << e.what() << std::endl;
-    //}
 
     while(!glfwWindowShouldClose(window)) {
         frame_timer.start_frame();
@@ -99,11 +92,6 @@ void Application::run() {
 
         // Render phase
         render_scene();
-
-        // UI rendering
-        //ui.new_frame();
-        //ui.render(camera, terrain.render_distance);
-        //ui.render_frame();
 
         // Frame timing
         frame_timer.cap_frame();
